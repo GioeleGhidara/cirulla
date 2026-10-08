@@ -70,12 +70,12 @@ export const CIRULLA_GUIDE: GuideSection[] = [
       'All\'inizio della smazzata, il mazziere pone 4 carte scoperte sul tavolo:\n\n• Somma pari a 15: il mazziere prende tutte e 4 le carte e segna 1 Scopa (+1 pt).\n• Somma pari a 30: il mazziere raccoglie tutto e segna 2 Scope (+2 pt).\n• Due Assi a terra: la smazzata "va a monte" e si deve rimescolare il mazzo.\n• Quattro carte uguali: evento leggendario! Il mazziere si aggiudica istantaneamente la partita.',
   },
   {
-    title: 'Le Bussate di Mano (Accuse)',
+    title: 'Le Bussate di Mano: Cirulla e Decino',
     badge: 'LE BUSSATE',
     content:
-      'All\'inizio di ogni mano da 3 carte, prima di giocare, controlla bene cosa hai ricevuto:\n\n• Somma ≤ 9 ("Bussata da tre"): bussa sul tavolo! Guadagni subito 3 Scope (3 punti) e giochi la mano a carte scoperte.\n• Tre carte uguali ("Bussata da dieci"): bussa forte sul tavolo! Guadagni subito 10 Scope (10 punti) e giochi a carte scoperte tra i complimenti (e i mugugni) degli avversari.',
+      'All\'inizio di ogni mano da 3 carte, prima di giocare, controlla bene cosa hai ricevuto:\n\n• Somma ≤ 9 ("Cirulla"): bussa sul tavolo dichiarando "Cirulla"! Guadagni subito 3 Scope (3 punti) e giochi la mano a carte scoperte.\n• Tre carte uguali ("Decino"): bussa forte sul tavolo dichiarando "Decino"! Guadagni subito 10 Scope (10 punti) e giochi a carte scoperte tra i complimenti (e i mugugni) degli avversari.',
     curiosity:
-      'La Matta: Il 7 di Cuori (o 7 di Spade) è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per consentire una bussata da tre o da dieci!',
+      'La Matta: Il 7 di Cuori (o 7 di Spade) è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per realizzare una Cirulla (3 pt) o un Decino (10 pt)!',
   },
   {
     title: 'Le Prese: Regola del 15, Uguale e Somma',

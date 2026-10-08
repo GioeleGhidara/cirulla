@@ -71,8 +71,8 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         {renderStatCard('Miglior punteggio', stats.bestScoreInGame, 'trophy-outline', theme.colors.warning)}
         {renderStatCard('Piccole (Denari)', stats.piccoleMade, 'trending-up-outline', theme.colors.primaryLight)}
         {renderStatCard('Grandi (5 pt)', stats.grandiMade, 'diamond-outline', '#ec4899')}
-        {renderStatCard('Buona da 3', stats.accuseTreMade, 'hand-left-outline', '#a855f7')}
-        {renderStatCard('Buona da 10', stats.accuseDieciMade, 'ribbon-outline', theme.colors.success)}
+        {renderStatCard('Cirulla (3 pt)', stats.accuseTreMade, 'hand-left-outline', '#a855f7')}
+        {renderStatCard('Decino (10 pt)', stats.accuseDieciMade, 'ribbon-outline', theme.colors.success)}
       </View>
 
       <Pressable

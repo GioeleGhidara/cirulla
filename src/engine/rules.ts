@@ -62,7 +62,7 @@ function evaluateThreeOfAKind(hand: readonly Card[], mattaIndex: number): Accusa
       return {
         type: 'dieci',
         points: GAME_CONFIG.ACCUSA.DIECI_POINTS,
-        description: 'Buona da dieci: tre carte uguali',
+        description: 'Decino: tre carte uguali',
         cards: hand,
       };
     }
@@ -74,7 +74,7 @@ function evaluateThreeOfAKind(hand: readonly Card[], mattaIndex: number): Accusa
     return {
       type: 'dieci',
       points: GAME_CONFIG.ACCUSA.DIECI_POINTS,
-      description: 'Buona da dieci: tris con la Matta',
+      description: 'Decino: tris con la Matta',
       cards: hand,
       usedMatta: true,
     };
@@ -90,7 +90,7 @@ function evaluateSumBelowNine(hand: readonly Card[], mattaIndex: number): Accusa
       return {
         type: 'tre',
         points: GAME_CONFIG.ACCUSA.TRE_POINTS,
-        description: `Buona da tre: somma carte = ${sum}`,
+        description: `Cirulla: somma carte = ${sum} (≤ 9)`,
         cards: hand,
       };
     }
@@ -106,7 +106,7 @@ function evaluateSumBelowNine(hand: readonly Card[], mattaIndex: number): Accusa
     return {
       type: 'tre',
       points: GAME_CONFIG.ACCUSA.TRE_POINTS,
-      description: `Buona da tre con la Matta: somma = ${minSum}`,
+      description: `Cirulla con la Matta: somma = ${minSum} (≤ 9)`,
       cards: hand,
       usedMatta: true,
     };
