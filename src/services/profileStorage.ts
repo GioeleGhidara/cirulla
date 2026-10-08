@@ -53,6 +53,22 @@ export const AVAILABLE_AVATARS: readonly PlayerAvatar[] = [
     color: '#8b5cf6',
     description: 'Distribuisce le smazzate tra focaccia calda e mugugno amichevole.',
   },
+  {
+    id: 'mugugno',
+    name: 'Re del Mugugno',
+    role: 'Filosofo del Molo',
+    icon: 'cafe-outline',
+    color: '#f97316',
+    description: 'Si lamenta della sfortuna finché non piazza una scopa decisiva.',
+  },
+  {
+    id: 'corsaro',
+    name: 'Corsaro Ligure',
+    role: 'Audace dei Caruggi',
+    icon: 'skull-outline',
+    color: '#06b6d4',
+    description: 'Non teme il rischio e cerca sempre la presa più spettacolare.',
+  },
 ];
 
 export const CAREER_RANKS: readonly CareerRank[] = [
