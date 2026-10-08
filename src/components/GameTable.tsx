@@ -38,6 +38,9 @@ interface GameTableProps {
   playerCaptured: Card[];
   aiCaptured: Card[];
   lastActionMessage?: string;
+  playerName?: string;
+  playerAvatarIcon?: string;
+  playerAvatarColor?: string;
 }
 
 /**
@@ -100,6 +103,9 @@ export const GameTable: React.FC<GameTableProps> = ({
   isPlayerTurn,
   playerCaptured,
   aiCaptured,
+  playerName,
+  playerAvatarIcon,
+  playerAvatarColor,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const isTablet = screenWidth > 600;
@@ -341,20 +347,41 @@ export const GameTable: React.FC<GameTableProps> = ({
 
         {/* Fila Mano Giocatore + Pila Prese accanto */}
         <View style={styles.playerBottomRow}>
-          {/* Spazio informativo sinistro discreto (es. Mazziere) */}
+          {/* Spazio informativo sinistro: Mini Avatar Giocatore + Mazziere */}
           <View style={styles.playerInfoSlot}>
+            <View
+              style={[
+                styles.avatarMini,
+                {
+                  backgroundColor: playerAvatarColor ? `${playerAvatarColor}22` : '#1e293b',
+                  borderColor: playerAvatarColor || '#334155',
+                },
+              ]}
+            >
+              <Ionicons
+                name={(playerAvatarIcon as any) || 'person'}
+                size={12}
+                color={playerAvatarColor || theme.colors.primaryLight}
+              />
+            </View>
             {dealer === 'player' && (
               <AppBadge label="Mazziere" variant="gold" size="sm" />
             )}
           </View>
 
           {/* Mano del Giocatore (carte grandi ben visibili) */}
-          <View style={styles.playerHandRow}>
+          <View style={[styles.playerHandRow, !isPlayerTurn && styles.playerHandRowWaiting]}>
             {playerHand.map((card) => {
               const isSelected = selectedCard?.id === card.id;
 
               return (
-                <View key={`player-hand-${card.id}`} style={styles.playerHandCard}>
+                <View
+                  key={`player-hand-${card.id}`}
+                  style={[
+                    styles.playerHandCard,
+                    isSelected && styles.playerHandCardSelected,
+                  ]}
+                >
                   <CardView
                     card={card}
                     deckStyle={deckStyle}
@@ -648,8 +675,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
   },
+  playerHandRowWaiting: {
+    opacity: 0.88,
+  },
   playerHandCard: {
     marginHorizontal: 1,
+  },
+  playerHandCardSelected: {
+    transform: [{ translateY: -14 }],
+    zIndex: 10,
   },
   playerPileSlot: {
     width: 60,

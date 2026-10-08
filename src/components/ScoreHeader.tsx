@@ -17,6 +17,9 @@ interface ScoreHeaderProps {
   aiScope: number;
   currentHandIndex: number; // 1 to 6
   aiDifficulty: string;
+  playerName?: string;
+  playerAvatarIcon?: string;
+  playerAvatarColor?: string;
   onGoHome?: () => void;
   onOpenSettings: () => void;
   onOpenRules: () => void;
@@ -36,6 +39,9 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   aiScope,
   currentHandIndex,
   aiDifficulty,
+  playerName,
+  playerAvatarIcon,
+  playerAvatarColor,
   onGoHome,
   onOpenSettings,
   onOpenRules,
@@ -154,8 +160,14 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
         {/* Player Section */}
         <View style={styles.playerSection}>
           <View style={styles.nameRow}>
-            <Ionicons name="person-circle-outline" size={16} color={theme.colors.primaryLight} />
-            <Text style={styles.playerName}>TU</Text>
+            <Ionicons
+              name={(playerAvatarIcon as any) || 'person-circle-outline'}
+              size={15}
+              color={playerAvatarColor || theme.colors.primaryLight}
+            />
+            <Text style={styles.playerName} numberOfLines={1}>
+              {playerName ? playerName.toUpperCase() : 'TU'}
+            </Text>
           </View>
           <Text style={styles.mainScore}>{playerScore}</Text>
           <View style={styles.statsMiniRow}>
@@ -169,8 +181,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
             </View>
             {playerScope > 0 && (
               <View style={styles.scopaMiniBadge}>
-                <Ionicons name="sparkles" size={10} color="#0f172a" />
-                <Text style={styles.scopaMiniText}>{playerScope}</Text>
+                <Text style={styles.scopaMiniText}>S {playerScope}</Text>
               </View>
             )}
           </View>
@@ -189,15 +200,14 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
         {/* AI Section */}
         <View style={[styles.playerSection, styles.aiSection]}>
           <View style={styles.nameRow}>
-            <Ionicons name="hardware-chip-outline" size={16} color={theme.colors.danger} />
+            <Ionicons name="hardware-chip-outline" size={15} color={theme.colors.danger} />
             <Text style={styles.playerName}>AVVERSARIO</Text>
           </View>
           <Text style={styles.mainScore}>{aiScore}</Text>
           <View style={styles.statsMiniRow}>
             {aiScope > 0 && (
               <View style={[styles.scopaMiniBadge, styles.scopaAIBadge]}>
-                <Ionicons name="sparkles" size={10} color="#ffffff" />
-                <Text style={[styles.scopaMiniText, styles.scopaAIText]}>{aiScope}</Text>
+                <Text style={[styles.scopaMiniText, styles.scopaAIText]}>S {aiScope}</Text>
               </View>
             )}
             <View style={styles.miniStatItem}>

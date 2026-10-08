@@ -26,6 +26,7 @@ import {
   loadPlayerProfile,
   savePlayerProfile,
   DEFAULT_PROFILE,
+  AVAILABLE_AVATARS,
   evaluateTrophiesEarned,
 } from './src/services/profileStorage';
 import { getInstalledDeckIds } from './src/services/deckStorage';
@@ -88,6 +89,9 @@ export default function App() {
     game.playerHand.length > 0 ||
     game.playerTotalScore > 0 ||
     game.aiTotalScore > 0;
+
+  const currentAvatar =
+    AVAILABLE_AVATARS.find((a) => a.id === playerProfile.avatarId) ?? AVAILABLE_AVATARS[0];
 
   const handleStartConfiguredMatch = (options: {
     targetScore: 31 | 51;
@@ -156,6 +160,9 @@ export default function App() {
             aiScope={game.aiScope}
             currentHandIndex={game.handIndex}
             aiDifficulty={game.settings.aiDifficulty}
+            playerName={playerProfile.name}
+            playerAvatarIcon={currentAvatar.icon}
+            playerAvatarColor={currentAvatar.color}
             onGoHome={() => setCurrentScreen('home')}
             onOpenSettings={() => setIsSettingsVisible(true)}
             onOpenRules={() => setIsRulesVisible(true)}
@@ -191,6 +198,9 @@ export default function App() {
             playerCaptured={game.playerCaptured}
             aiCaptured={game.aiCaptured}
             lastActionMessage={game.lastActionMessage}
+            playerName={playerProfile.name}
+            playerAvatarIcon={currentAvatar.icon}
+            playerAvatarColor={currentAvatar.color}
           />
         </>
       )}
