@@ -150,31 +150,52 @@ interface MonteBannerProps {
   visible: boolean;
   who: 'player' | 'ai';
   sum: number;
-  scopeCount: number;
+  scopeCount?: number;
 }
 
 export const MonteBanner: React.FC<MonteBannerProps> = ({
   visible,
   who,
   sum,
-  scopeCount,
 }) => {
+  const scale = useRef(new Animated.Value(0.3)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 4,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      scale.setValue(0.3);
+      opacity.setValue(0);
+    }
+  }, [visible]);
+
   if (!visible) return null;
 
-  const actor = who === 'player' ? 'Sei il mazziere' : "L'avversario è il mazziere";
+  const message = who === 'player' ? `Hai fatto ${sum}` : `L'avversario ha fatto ${sum}`;
 
   return (
     <View style={styles.overlay} pointerEvents="none">
-      <View style={styles.monteBox}>
-        <AppBadge label="Regola del Monte" variant="primary" icon="layers-outline" size="sm" />
-        <Text style={styles.monteTitle}>
-          Tavolo iniziale somma = {sum}
-        </Text>
-        <Text style={styles.monteDesc}>
-          {actor} e prende tutte le 4 carte a terra realizzando {scopeCount}{' '}
-          {scopeCount === 1 ? 'scopa' : 'scope'} (+{scopeCount} pt).
-        </Text>
-      </View>
+      <Animated.View
+        style={[
+          styles.monteBox,
+          { transform: [{ scale }], opacity },
+        ]}
+      >
+        <Text style={styles.monteTitle}>{message}</Text>
+      </Animated.View>
     </View>
   );
 };
@@ -278,31 +299,24 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.md,
   },
   monteBox: {
-    backgroundColor: theme.colors.surface,
-    paddingVertical: theme.spacing.lg,
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+    paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.xl,
-    borderRadius: theme.radii.xl,
+    borderRadius: theme.radii.full,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.cardBorder,
-    maxWidth: 360,
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: theme.colors.accentGold,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.5,
-    shadowRadius: 15,
+    shadowRadius: 12,
     elevation: 20,
   },
   monteTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '800',
-    color: theme.colors.textPrimary,
-    marginTop: theme.spacing.sm,
-    marginBottom: 4,
-  },
-  monteDesc: {
-    fontSize: 12.5,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
+    color: '#f8fafc',
+    letterSpacing: 0.5,
   },
 });

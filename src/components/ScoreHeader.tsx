@@ -17,6 +17,7 @@ interface ScoreHeaderProps {
   aiScope: number;
   currentHandIndex: number; // 1 to 6
   aiDifficulty: string;
+  onGoHome?: () => void;
   onOpenSettings: () => void;
   onOpenRules: () => void;
   onOpenStats: () => void;
@@ -35,6 +36,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   aiScope,
   currentHandIndex,
   aiDifficulty,
+  onGoHome,
   onOpenSettings,
   onOpenRules,
   onOpenStats,
@@ -49,6 +51,17 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
       {/* Top action row */}
       <View style={styles.topRow}>
         <View style={styles.titleGroup}>
+          {onGoHome && (
+            <Pressable
+              style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+              hitSlop={theme.touch.hitSlop}
+              onPress={onGoHome}
+              accessibilityRole="button"
+              accessibilityLabel="Torna al menu principale"
+            >
+              <Ionicons name="home-outline" size={18} color={theme.colors.textPrimary} />
+            </Pressable>
+          )}
           <Text style={styles.appTitle}>CIRULLA</Text>
           <AppBadge
             label={`${targetScore} PT`}

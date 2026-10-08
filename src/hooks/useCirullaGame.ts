@@ -236,14 +236,14 @@ export function useCirullaGame() {
     checkAndApplyAccuse(pHand, aHand, currentSettings);
   }, [settings, checkAndApplyAccuse]);
 
-  const startNewMatch = useCallback((cfg = settings) => {
+  const startNewMatch = useCallback((cfg = settings, initialDealer: PlayerSide = 'ai') => {
     clearActiveMatch();
     setPlayerTotalScore(0);
     setAiTotalScore(0);
-    setDealer('ai');
+    setDealer(initialDealer);
     setIsGameOverVisible(false);
     setIsDealSummaryVisible(false);
-    startNewDeal('ai', cfg);
+    startNewDeal(initialDealer, cfg);
   }, [settings, startNewDeal]);
 
   useEffect(() => {
@@ -730,7 +730,14 @@ export function useCirullaGame() {
     },
     cancelChoiceModal: () => setIsChoiceModalVisible(false),
     proceedToNextDealOrEnd,
-    restartMatch: () => startNewMatch(),
+    restartMatch: (customSettings?: GameSettings, chosenDealer?: PlayerSide) => {
+      const cfg = customSettings ?? settings;
+      if (customSettings) {
+        setSettings(customSettings);
+        saveSettings(customSettings);
+      }
+      startNewMatch(cfg, chosenDealer ?? 'ai');
+    },
     updateSettings,
     resetStats,
   };
