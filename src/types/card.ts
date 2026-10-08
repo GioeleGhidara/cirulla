@@ -91,9 +91,27 @@ export interface GameStats {
 
 export type CardGraphicStyle = 'genovesi_autentiche' | 'moderno' | 'classico';
 
+export type DeckSkinId =
+  | 'genovesi_dal_negro'
+  | 'ramino_modiano'
+  | 'baroque_piatnik'
+  | 'ancient_french'
+  | 'lombarde_ticinesi'
+  | 'genovesi_modiano'
+  | 'napoletane_classiche'
+  | 'russian_atlasnye'
+  | 'folklore_piatnik'
+  | 'kaiser_piatnik'
+  | 'salon_karte_66'
+  | 'dondorf'
+  | 'carta_mundi'
+  | 'moderno'
+  | 'classico_poker';
+
 export interface GameSettings {
   readonly deckStyle: DeckStyle;
   readonly cardGraphicStyle?: CardGraphicStyle;
+  readonly deckSkinId?: DeckSkinId;
   readonly aiDifficulty: AIDifficulty;
   readonly targetScore: 31 | 51;
   readonly soundEnabled: boolean;

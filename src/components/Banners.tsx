@@ -1,7 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { CardView } from './CardView';
 import { Card, DeckStyle } from '../types/card';
+import { theme } from '../theme/tokens';
+import { AppBadge } from './common/AppBadge';
 
 interface ScopaBannerProps {
   visible: boolean;
@@ -36,7 +39,8 @@ export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 
 
   if (!visible) return null;
 
-  const title = who === 'player' ? 'SCOPA!' : "L'AVVERSARIO FA SCOPA!";
+  const isPlayer = who === 'player';
+  const title = isPlayer ? 'SCOPA' : "SCOPA DELL'AVVERSARIO";
   const sub = count > 1 ? `+${count} Punti` : '+1 Punto';
 
   return (
@@ -44,12 +48,15 @@ export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 
       <Animated.View
         style={[
           styles.scopaBox,
-          who === 'player' ? styles.playerScopaBg : styles.aiScopaBg,
+          isPlayer ? styles.playerScopaBg : styles.aiScopaBg,
           { transform: [{ scale }], opacity },
         ]}
       >
-        <Text style={styles.scopaStar}>✨ ⭐ ✨</Text>
-        <Text style={styles.scopaTitle}>{title}</Text>
+        <View style={styles.scopaIconRow}>
+          <Ionicons name="sparkles" size={18} color="#ffffff" />
+          <Text style={styles.scopaTitle}>{title}</Text>
+          <Ionicons name="sparkles" size={18} color="#ffffff" />
+        </View>
         <Text style={styles.scopaSub}>{sub}</Text>
       </Animated.View>
     </View>
@@ -100,7 +107,7 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
 
   if (!visible) return null;
 
-  const actor = who === 'player' ? 'HAI DICHIARATO:' : "L'AVVERSARIO HA DICHIARATO:";
+  const actor = who === 'player' ? 'Hai dichiarato:' : "L'avversario ha dichiarato:";
 
   return (
     <View style={styles.overlay} pointerEvents="none">
@@ -112,12 +119,15 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
       >
         <Text style={styles.accusaActor}>{actor}</Text>
         <Text style={styles.accusaTitle}>{title}</Text>
-        <View style={styles.accusaPointsBadge}>
-          <Text style={styles.accusaPointsText}>+{points} PUNTI SUBITO!</Text>
+        <View style={styles.accusaBadgeWrap}>
+          <AppBadge label={`+${points} punti subito`} variant="gold" icon="flash" size="md" />
         </View>
 
         {usedMatta && (
-          <Text style={styles.mattaUsedText}>🃏 Matta utilizzata con successo</Text>
+          <View style={styles.mattaRow}>
+            <Ionicons name="sparkles-outline" size={12} color={theme.colors.accentGoldLight} />
+            <Text style={styles.mattaUsedText}>Matta utilizzata nella combinazione</Text>
+          </View>
         )}
 
         <View style={styles.accusaCardsRow}>
@@ -156,13 +166,13 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
   return (
     <View style={styles.overlay} pointerEvents="none">
       <View style={styles.monteBox}>
-        <Text style={styles.monteTag}>🎲 REGOLA DEL MONTE</Text>
+        <AppBadge label="Regola del Monte" variant="primary" icon="layers-outline" size="sm" />
         <Text style={styles.monteTitle}>
-          Tavolo iniziale somma = {sum}!
+          Tavolo iniziale somma = {sum}
         </Text>
         <Text style={styles.monteDesc}>
-          {actor} e prende tutte le 4 carte a terra facendo {scopeCount}{' '}
-          {scopeCount === 1 ? 'Scopa' : 'Scope'} (+{scopeCount} pt)!
+          {actor} e prende tutte le 4 carte a terra realizzando {scopeCount}{' '}
+          {scopeCount === 1 ? 'scopa' : 'scope'} (+{scopeCount} pt).
         </Text>
       </View>
     </View>
@@ -181,125 +191,118 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   scopaBox: {
-    paddingVertical: 18,
-    paddingHorizontal: 28,
-    borderRadius: 20,
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xxl,
+    borderRadius: theme.radii.xl,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.6,
+    shadowOpacity: 0.5,
     shadowRadius: 15,
     elevation: 20,
-    borderWidth: 2,
-    borderColor: '#fef08a',
+    borderWidth: 1.5,
   },
   playerScopaBg: {
-    backgroundColor: '#047857',
+    backgroundColor: theme.colors.feltGreen,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   aiScopaBg: {
-    backgroundColor: '#b91c1c',
+    backgroundColor: theme.colors.danger,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
-  scopaStar: {
-    fontSize: 20,
-    marginBottom: 2,
+  scopaIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   scopaTitle: {
-    color: '#ffffff',
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '900',
+    color: '#ffffff',
     letterSpacing: 1.5,
-    textAlign: 'center',
   },
   scopaSub: {
-    color: '#fef08a',
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#ffffff',
+    opacity: 0.9,
     marginTop: 4,
   },
   accusaBox: {
-    backgroundColor: '#0f172a',
-    borderRadius: 18,
-    padding: 16,
+    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xl,
+    borderRadius: theme.radii.xl,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#38bdf8',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 15,
-    maxWidth: 320,
+    shadowRadius: 15,
+    elevation: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    maxWidth: 380,
   },
   accusaActor: {
-    color: '#94a3b8',
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
+    color: theme.colors.textMuted,
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   accusaTitle: {
-    color: '#38bdf8',
     fontSize: 18,
     fontWeight: '900',
+    color: theme.colors.textPrimary,
     marginTop: 2,
+    marginBottom: theme.spacing.xs,
     textAlign: 'center',
   },
-  accusaPointsBadge: {
-    backgroundColor: 'rgba(56, 189, 248, 0.2)',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    marginTop: 6,
-    marginBottom: 8,
+  accusaBadgeWrap: {
+    marginVertical: 4,
   },
-  accusaPointsText: {
-    color: '#bae6fd',
-    fontSize: 12,
-    fontWeight: '800',
+  mattaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
   },
   mattaUsedText: {
-    color: '#fbbf24',
     fontSize: 11,
-    fontWeight: '700',
-    marginBottom: 6,
+    color: theme.colors.accentGoldLight,
+    fontWeight: '600',
   },
   accusaCardsRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginTop: 4,
+    gap: 6,
+    marginTop: theme.spacing.md,
   },
   monteBox: {
-    backgroundColor: '#78350f',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xl,
+    borderRadius: theme.radii.xl,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#f59e0b',
-    maxWidth: 320,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
-    elevation: 12,
-  },
-  monteTag: {
-    color: '#fef3c7',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    maxWidth: 360,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 20,
   },
   monteTitle: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '900',
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
+    marginTop: theme.spacing.sm,
+    marginBottom: 4,
   },
   monteDesc: {
-    color: '#fde68a',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 12.5,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
-    marginTop: 4,
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

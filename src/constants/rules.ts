@@ -59,7 +59,7 @@ export const CIRULLA_GUIDE: GuideSection[] = [
     title: 'Il Mazzo e i Valori delle Carte',
     badge: 'LE CARTE',
     content:
-      'Si gioca con un mazzo da 40 carte genovesi con i semi francesi (Denari ♦, Cuori ♥, Picche ♠, Fiori ♣) o con carte regionali (Denari, Coppe, Spade, Bastoni).\n\n• Asso = vale 1\n• 2, 3, 4, 5, 6, 7 = valore facciale\n• Jack (Fante) = vale 8\n• Donna (Cavallo) = vale 9\n• Re = vale 10',
+      'Si gioca con un mazzo da 40 carte genovesi con i semi francesi (Denari, Cuori, Picche, Fiori) o con carte regionali (Denari, Coppe, Spade, Bastoni).\n\n• Asso = vale 1\n• 2, 3, 4, 5, 6, 7 = valore facciale\n• Jack (Fante) = vale 8\n• Donna (Cavallo) = vale 9\n• Re = vale 10',
     curiosity:
       'Nelle carte genovesi i semi hanno i simboli francesi, dove i quadri sono chiamati "Denari". Si può usare anche un mazzo francese da 52 togliendo 8, 9, 10 e Jolly: le figure mantengono il valore Jack = 8, Donna = 9, Re = 10!',
   },
@@ -95,7 +95,7 @@ export const CIRULLA_GUIDE: GuideSection[] = [
     title: 'Calcolo dei Punti di Mazzo e Cappotto',
     badge: 'PUNTEGGI',
     content:
-      'A fine smazzata si conteggiano:\n\n• Carte: chi ha più di 20 carte guadagna 1 punto.\n• Denari: chi ha più di 5 Denari (Quadri ♦) guadagna 1 punto.\n• Settebello: il 7 di Denari (7♦) vale 1 punto.\n• Primiera: il miglior punteggio nei 4 semi vale 1 punto.\n• Scope: 1 punto per ogni scopa effettuata.\n• Piccola: Asso, 2 e 3 di Denari = 3 punti. Se hai anche 4, 5, 6, 7 consecutivi vale fino a 7 punti!\n• Grande: Jack (8), Donna (9) e Re (10) di Denari = 5 punti. Se manca una carta è "rotta" (0 pt).\n\n🔥 CAPPOTTO DI DENARI: Se un giocatore prende tutti i 10 Denari (Quadri), fa cappotto e vince immediatamente la partita!',
+      'A fine smazzata si conteggiano:\n\n• Carte: chi ha più di 20 carte guadagna 1 punto.\n• Denari: chi ha più di 5 Denari guadagna 1 punto.\n• Settebello: il 7 di Denari vale 1 punto.\n• Primiera: il miglior punteggio nei 4 semi vale 1 punto.\n• Scope: 1 punto per ogni scopa effettuata.\n• Piccola: Asso, 2 e 3 di Denari = 3 punti. Se hai anche 4, 5, 6, 7 consecutivi vale fino a 7 punti!\n• Grande: Jack (8), Donna (9) e Re (10) di Denari = 5 punti. Se manca una carta è "rotta" (0 pt).\n\nCAPPOTTO DI DENARI: Se un giocatore prende tutti i 10 Denari, fa cappotto e vince immediatamente la partita!',
     curiosity:
       'I Denari ("palanche") sono il seme più prestigioso della Cirulla: chi controlla i Denari controlla il destino della partita.',
   },

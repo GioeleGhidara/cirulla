@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../types/card';
 import { isDenari } from '../engine/rules';
+import { theme } from '../theme/tokens';
+import { AppBadge } from './common/AppBadge';
 
 interface ScoreHeaderProps {
   playerScore: number;
@@ -19,6 +21,7 @@ interface ScoreHeaderProps {
   onOpenRules: () => void;
   onOpenStats: () => void;
   onOpenDeckGallery?: () => void;
+  onOpenDeckSkins?: () => void;
 }
 
 export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
@@ -36,6 +39,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   onOpenRules,
   onOpenStats,
   onOpenDeckGallery,
+  onOpenDeckSkins,
 }) => {
   const playerDenari = playerCaptured.filter(isDenari).length;
   const aiDenari = aiCaptured.filter(isDenari).length;
@@ -46,45 +50,89 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
       <View style={styles.topRow}>
         <View style={styles.titleGroup}>
           <Text style={styles.appTitle}>CIRULLA</Text>
-          <View style={styles.targetBadge}>
-            <Text style={styles.targetText}>🎯 {targetScore} pt</Text>
-          </View>
-          <View style={styles.diffBadge}>
-            <Text style={styles.diffText}>{aiDifficulty.toUpperCase()}</Text>
-          </View>
+          <AppBadge
+            label={`${targetScore} PT`}
+            variant="gold"
+            icon="flag-outline"
+            size="sm"
+          />
+          <AppBadge
+            label={aiDifficulty}
+            variant="default"
+            size="sm"
+          />
         </View>
 
         <View style={styles.actionsGroup}>
-          {onOpenDeckGallery && (
-            <TouchableOpacity
-              style={styles.actionBtn}
-              onPress={onOpenDeckGallery}
-              accessibilityLabel="Layout Carte"
+          {onOpenDeckSkins && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.actionBtn,
+                styles.actionBtnSkin,
+                pressed && styles.actionBtnPressed,
+              ]}
+              hitSlop={theme.touch.hitSlop}
+              onPress={onOpenDeckSkins}
+              accessibilityRole="button"
+              accessibilityLabel="Scegli skin del mazzo"
             >
-              <Ionicons name="images-outline" size={20} color="#38bdf8" />
-            </TouchableOpacity>
+              <Ionicons name="color-palette-outline" size={19} color={theme.colors.accentGoldLight} />
+            </Pressable>
           )}
-          <TouchableOpacity
-            style={styles.actionBtn}
+
+          {onOpenDeckGallery && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.actionBtn,
+                pressed && styles.actionBtnPressed,
+              ]}
+              hitSlop={theme.touch.hitSlop}
+              onPress={onOpenDeckGallery}
+              accessibilityRole="button"
+              accessibilityLabel="Mostra tutti i layout delle carte"
+            >
+              <Ionicons name="images-outline" size={19} color={theme.colors.primaryLight} />
+            </Pressable>
+          )}
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionBtn,
+              pressed && styles.actionBtnPressed,
+            ]}
+            hitSlop={theme.touch.hitSlop}
             onPress={onOpenRules}
-            accessibilityLabel="Regole"
+            accessibilityRole="button"
+            accessibilityLabel="Regolamento di gioco"
           >
-            <Ionicons name="book-outline" size={20} color="#f8fafc" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
+            <Ionicons name="book-outline" size={19} color={theme.colors.textPrimary} />
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionBtn,
+              pressed && styles.actionBtnPressed,
+            ]}
+            hitSlop={theme.touch.hitSlop}
             onPress={onOpenStats}
-            accessibilityLabel="Statistiche"
+            accessibilityRole="button"
+            accessibilityLabel="Statistiche di gioco"
           >
-            <Ionicons name="trophy-outline" size={20} color="#facc15" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
+            <Ionicons name="stats-chart-outline" size={19} color={theme.colors.textPrimary} />
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionBtn,
+              pressed && styles.actionBtnPressed,
+            ]}
+            hitSlop={theme.touch.hitSlop}
             onPress={onOpenSettings}
+            accessibilityRole="button"
             accessibilityLabel="Impostazioni"
           >
-            <Ionicons name="settings-outline" size={20} color="#f8fafc" />
-          </TouchableOpacity>
+            <Ionicons name="settings-outline" size={19} color={theme.colors.textPrimary} />
+          </Pressable>
         </View>
       </View>
 
@@ -93,17 +141,23 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
         {/* Player Section */}
         <View style={styles.playerSection}>
           <View style={styles.nameRow}>
-            <Ionicons name="person-circle" size={18} color="#60a5fa" />
+            <Ionicons name="person-circle-outline" size={16} color={theme.colors.primaryLight} />
             <Text style={styles.playerName}>TU</Text>
           </View>
           <Text style={styles.mainScore}>{playerScore}</Text>
           <View style={styles.statsMiniRow}>
-            <Text style={styles.statsMiniText}>
-              🎴 {playerCaptured.length}  ♦ {playerDenari}
-            </Text>
+            <View style={styles.miniStatItem}>
+              <Ionicons name="copy-outline" size={11} color={theme.colors.textSecondary} />
+              <Text style={styles.statsMiniText}>{playerCaptured.length}</Text>
+            </View>
+            <View style={styles.miniStatItem}>
+              <Ionicons name="diamond-outline" size={11} color={theme.colors.cardRed} />
+              <Text style={styles.statsMiniText}>{playerDenari}</Text>
+            </View>
             {playerScope > 0 && (
               <View style={styles.scopaMiniBadge}>
-                <Text style={styles.scopaMiniText}>⭐ {playerScope}</Text>
+                <Ionicons name="sparkles" size={10} color="#0f172a" />
+                <Text style={styles.scopaMiniText}>{playerScope}</Text>
               </View>
             )}
           </View>
@@ -122,19 +176,25 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
         {/* AI Section */}
         <View style={[styles.playerSection, styles.aiSection]}>
           <View style={styles.nameRow}>
-            <Ionicons name="hardware-chip-outline" size={16} color="#f87171" />
+            <Ionicons name="hardware-chip-outline" size={16} color={theme.colors.danger} />
             <Text style={styles.playerName}>AVVERSARIO</Text>
           </View>
           <Text style={styles.mainScore}>{aiScore}</Text>
           <View style={styles.statsMiniRow}>
-            <Text style={styles.statsMiniText}>
-              🎴 {aiCaptured.length}  ♦ {aiDenari}
-            </Text>
             {aiScope > 0 && (
               <View style={[styles.scopaMiniBadge, styles.scopaAIBadge]}>
-                <Text style={styles.scopaMiniText}>⭐ {aiScope}</Text>
+                <Ionicons name="sparkles" size={10} color="#ffffff" />
+                <Text style={[styles.scopaMiniText, styles.scopaAIText]}>{aiScope}</Text>
               </View>
             )}
+            <View style={styles.miniStatItem}>
+              <Ionicons name="diamond-outline" size={11} color={theme.colors.cardRed} />
+              <Text style={styles.statsMiniText}>{aiDenari}</Text>
+            </View>
+            <View style={styles.miniStatItem}>
+              <Ionicons name="copy-outline" size={11} color={theme.colors.textSecondary} />
+              <Text style={styles.statsMiniText}>{aiCaptured.length}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -144,50 +204,26 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 12,
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.xs,
+    paddingBottom: theme.spacing.xs,
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: theme.spacing.sm,
   },
   titleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: theme.spacing.sm,
   },
   appTitle: {
-    color: '#f8fafc',
+    color: theme.colors.textPrimary,
     fontSize: 18,
     fontWeight: '900',
-    letterSpacing: 1.5,
-  },
-  targetBadge: {
-    backgroundColor: 'rgba(234, 179, 8, 0.2)',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(234, 179, 8, 0.5)',
-  },
-  targetText: {
-    color: '#fef08a',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  diffBadge: {
-    backgroundColor: 'rgba(148, 163, 184, 0.2)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  diffText: {
-    color: '#94a3b8',
-    fontSize: 9,
-    fontWeight: '800',
+    letterSpacing: 1.2,
   },
   actionsGroup: {
     flexDirection: 'row',
@@ -195,29 +231,37 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   actionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    width: 38,
+    height: 38,
+    borderRadius: theme.radii.full,
+    backgroundColor: theme.colors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  actionBtnSkin: {
+    borderColor: 'rgba(217, 119, 6, 0.4)',
+    backgroundColor: 'rgba(217, 119, 6, 0.1)',
+  },
+  actionBtnPressed: {
+    opacity: 0.75,
+  },
   boardCard: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
-    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radii.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderColor: theme.colors.cardBorder,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   playerSection: {
     flex: 1,
@@ -232,62 +276,74 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   playerName: {
-    color: '#94a3b8',
+    color: theme.colors.textMuted,
     fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
   mainScore: {
-    color: '#f8fafc',
+    color: theme.colors.textPrimary,
     fontSize: 26,
     fontWeight: '900',
     lineHeight: 30,
+    marginTop: 2,
   },
   statsMiniRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 2,
+    gap: 8,
+    marginTop: 3,
+  },
+  miniStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
   },
   statsMiniText: {
-    color: '#cbd5e1',
-    fontSize: 10,
+    color: theme.colors.textSecondary,
+    fontSize: 11,
     fontWeight: '600',
   },
   scopaMiniBadge: {
-    backgroundColor: '#eab308',
-    borderRadius: 10,
-    paddingHorizontal: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: theme.colors.accentGoldLight,
+    borderRadius: theme.radii.full,
+    paddingHorizontal: 6,
     paddingVertical: 1,
   },
   scopaAIBadge: {
-    backgroundColor: '#f97316',
+    backgroundColor: theme.colors.danger,
   },
   scopaMiniText: {
     color: '#0f172a',
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '900',
+  },
+  scopaAIText: {
+    color: '#ffffff',
   },
   centerDivider: {
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: theme.spacing.sm,
   },
   handBadge: {
-    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    backgroundColor: 'rgba(2, 132, 199, 0.14)',
     borderColor: 'rgba(56, 189, 248, 0.3)',
     borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 6,
+    borderRadius: theme.radii.sm,
+    paddingHorizontal: 7,
     paddingVertical: 2,
   },
   handText: {
-    color: '#38bdf8',
+    color: theme.colors.primaryLight,
     fontSize: 10,
     fontWeight: '800',
   },
   deckCountText: {
-    color: '#64748b',
-    fontSize: 9,
+    color: theme.colors.textMuted,
+    fontSize: 9.5,
     fontWeight: '600',
     marginTop: 3,
   },

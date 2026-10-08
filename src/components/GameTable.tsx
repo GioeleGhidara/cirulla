@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { CardView } from './CardView';
-import { Card, DeckStyle, CardGraphicStyle, CaptureMove } from '../types/card';
+import { Card, DeckStyle, CardGraphicStyle, CaptureMove, DeckSkinId } from '../types/card';
 import { Ionicons } from '@expo/vector-icons';
+import { AppBadge } from './common/AppBadge';
+import { theme } from '../theme/tokens';
 
 interface GameTableProps {
   deckStyle: DeckStyle;
   graphicStyle?: CardGraphicStyle;
+  deckSkinId?: DeckSkinId;
   playerHand: Card[];
   aiHand: Card[];
   aiHandRevealed: boolean;
@@ -28,6 +31,7 @@ interface GameTableProps {
 export const GameTable: React.FC<GameTableProps> = ({
   deckStyle,
   graphicStyle,
+  deckSkinId,
   playerHand,
   aiHand,
   aiHandRevealed,
@@ -92,6 +96,7 @@ export const GameTable: React.FC<GameTableProps> = ({
               faceDown={!aiHandRevealed}
               deckStyle={deckStyle}
               graphicStyle={graphicStyle}
+              deckSkinId={deckSkinId}
               width={smallCardWidth}
               height={smallCardHeight}
               style={{ marginHorizontal: -4 }}
@@ -128,6 +133,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                     card={card}
                     deckStyle={deckStyle}
                     graphicStyle={graphicStyle}
+                    deckSkinId={deckSkinId}
                     width={cardWidth}
                     height={cardHeight}
                     isSelected={isSelectedInMove}
@@ -155,6 +161,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                   card={lastAICard}
                   faceDown={true}
                   deckStyle={deckStyle}
+                  deckSkinId={deckSkinId}
                   width={smallCardWidth}
                   height={smallCardHeight}
                 />
@@ -177,6 +184,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                   card={lastPlayerCard}
                   deckStyle={deckStyle}
                   graphicStyle={graphicStyle}
+                  deckSkinId={deckSkinId}
                   width={smallCardWidth}
                   height={smallCardHeight}
                 />
@@ -254,9 +262,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                       {label}
                     </Text>
                     {move.isScopa && (
-                      <View style={styles.scopaPillBadge}>
-                        <Text style={styles.scopaPillText}>★ SCOPA</Text>
-                      </View>
+                      <AppBadge label="Scopa" variant="gold" icon="sparkles" size="sm" />
                     )}
                   </TouchableOpacity>
                 );
@@ -299,9 +305,7 @@ export const GameTable: React.FC<GameTableProps> = ({
         <View style={styles.playerHeader}>
           <Text style={styles.playerSectionTitle}>Le Tue Carte</Text>
           {isPlayerTurn && (
-            <View style={styles.turnBadge}>
-              <Text style={styles.turnBadgeText}>È IL TUO TURNO</Text>
-            </View>
+            <AppBadge label="Tuo Turno" variant="success" icon="play-circle-outline" size="sm" />
           )}
         </View>
 
@@ -315,6 +319,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                 card={card}
                 deckStyle={deckStyle}
                 graphicStyle={graphicStyle}
+                deckSkinId={deckSkinId}
                 isSelected={isSelected}
                 isPlayable={isPlayerTurn}
                 onPress={() => isPlayerTurn && onSelectPlayerCard(card)}

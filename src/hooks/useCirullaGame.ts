@@ -20,6 +20,9 @@ import {
   saveSettings,
   loadStats,
   saveStats,
+  loadActiveMatch,
+  saveActiveMatch,
+  clearActiveMatch,
   DEFAULT_SETTINGS,
   DEFAULT_STATS,
 } from '../services/storage';
@@ -214,6 +217,7 @@ export function useCirullaGame() {
   }, [settings, checkAndApplyAccuse]);
 
   const startNewMatch = useCallback((cfg = settings) => {
+    clearActiveMatch();
     setPlayerTotalScore(0);
     setAiTotalScore(0);
     setDealer('ai');
@@ -226,9 +230,30 @@ export function useCirullaGame() {
     async function init() {
       const loadedSettings = await loadSettings();
       const loadedStats = await loadStats();
+      const savedMatch = await loadActiveMatch();
       setSettings(loadedSettings);
       setStats(loadedStats);
-      startNewMatch(loadedSettings);
+
+      if (savedMatch && savedMatch.deck && savedMatch.deck.length > 0) {
+        setPlayerTotalScore(savedMatch.playerTotalScore);
+        setAiTotalScore(savedMatch.aiTotalScore);
+        setDealer(savedMatch.dealer);
+        setHandIndex(savedMatch.handIndex);
+        setDeck([...savedMatch.deck]);
+        setPlayerHand([...savedMatch.playerHand]);
+        setAiHand([...savedMatch.aiHand]);
+        setTableCards([...savedMatch.tableCards]);
+        setPlayerCaptured([...savedMatch.playerCaptured]);
+        setAiCaptured([...savedMatch.aiCaptured]);
+        setPlayerScope(savedMatch.playerScope);
+        setAiScope(savedMatch.aiScope);
+        setPlayerAccusePts(savedMatch.playerAccusePts);
+        setAiAccusePts(savedMatch.aiAccusePts);
+        setIsPlayerTurn(savedMatch.isPlayerTurn);
+        setLastActionMessage('Partita ripresa dal salvataggio precedente.');
+      } else {
+        startNewMatch(loadedSettings);
+      }
     }
     init();
   }, [startNewMatch]);
@@ -306,6 +331,25 @@ export function useCirullaGame() {
           setIsPlayerTurn(dealer === 'ai');
           setLastActionMessage(`Mano ${nextHandIndex}/6 distribuita.`);
           checkAndApplyAccuse(nextPHand, nextAHand, settings);
+
+          saveActiveMatch({
+            playerTotalScore,
+            aiTotalScore,
+            dealer,
+            handIndex: nextHandIndex,
+            deck: nextDeck,
+            playerHand: nextPHand,
+            aiHand: nextAHand,
+            tableCards,
+            playerCaptured,
+            aiCaptured,
+            playerScope,
+            aiScope,
+            playerAccusePts,
+            aiAccusePts,
+            isPlayerTurn: dealer === 'ai',
+            savedAt: Date.now(),
+          });
         }, GAME_CONFIG.TIMINGS.DEAL_TRANSITION_DELAY_MS);
       } else {
         setTimeout(() => {
@@ -535,6 +579,7 @@ export function useCirullaGame() {
     const reachedTarget = playerTotalScore >= settings.targetScore || aiTotalScore >= settings.targetScore;
 
     if (reachedTarget || isCappotto) {
+      clearActiveMatch();
       setIsGameOverVisible(true);
       const playerWon = dealSummary?.isCappottoPlayer
         ? true

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Image } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, Image, Pressable } from 'react-native';
 import Svg, { Path, Circle, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { Card, CardGraphicStyle, DeckStyle, Suit } from '../types/card';
+import { Card, CardGraphicStyle, DeckSkinId, DeckStyle, Suit } from '../types/card';
 import { isMatta, isSettebello } from '../engine/rules';
-import { getGenovesiCardImage, getGenovesiCardBack } from '../assets/genovesiDeck';
+import { getSkinCardImage, getSkinCardBack } from '../assets/deckSkinsRegistry';
 
 export function getDeckOfCardsApiUrl(card: Card): string {
   const normSuit = (card.suit || '').toLowerCase();
@@ -38,6 +38,7 @@ interface CardViewProps {
   faceDown?: boolean;
   deckStyle?: DeckStyle;
   graphicStyle?: CardGraphicStyle;
+  deckSkinId?: DeckSkinId;
   isSelected?: boolean;
   isPlayable?: boolean;
   isHighlighted?: boolean;
@@ -46,6 +47,7 @@ interface CardViewProps {
   height?: number;
   style?: ViewStyle;
 }
+import { SuitSymbol } from './common/SuitSymbol';
 
 export interface SuitIconProps {
   suit: Suit;
@@ -53,198 +55,13 @@ export interface SuitIconProps {
   deckStyle?: DeckStyle;
 }
 
-const FrenchDiamondIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="diamondGrad" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0%" stopColor="#ef4444" />
-        <Stop offset="100%" stopColor="#b91c1c" />
-      </LinearGradient>
-    </Defs>
-    <Path
-      d="M12 2.2 L20 12 L12 21.8 L4 12 Z"
-      fill="url(#diamondGrad)"
-      stroke="#991b1b"
-      strokeWidth="0.8"
-    />
-  </Svg>
-);
-
-const FrenchHeartIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0%" stopColor="#ef4444" />
-        <Stop offset="100%" stopColor="#b91c1c" />
-      </LinearGradient>
-    </Defs>
-    <Path
-      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-      fill="url(#heartGrad)"
-      stroke="#991b1b"
-      strokeWidth="0.6"
-    />
-  </Svg>
-);
-
-const FrenchSpadeIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="spadeGrad" x1="0" y1="0" x2="0" y2="1">
-        <Stop offset="0%" stopColor="#334155" />
-        <Stop offset="100%" stopColor="#0f172a" />
-      </LinearGradient>
-    </Defs>
-    <Path
-      d="M12 2 C11.3 3.5 5 10.2 5 14.2 C5 17.2 7.3 18.5 9.7 18.5 C10.8 18.5 11.6 18 12 17.3 C12.4 18 13.2 18.5 14.3 18.5 C16.7 18.5 19 17.2 19 14.2 C19 10.2 12.7 3.5 12 2 Z"
-      fill="url(#spadeGrad)"
-    />
-    <Path
-      d="M11 16.5 C11 18.8 9.8 20.8 8.8 22 L15.2 22 C14.2 20.8 13 18.8 13 16.5 Z"
-      fill="url(#spadeGrad)"
-    />
-  </Svg>
-);
-
-const FrenchClubIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="clubGrad" x1="0" y1="0" x2="0" y2="1">
-        <Stop offset="0%" stopColor="#334155" />
-        <Stop offset="100%" stopColor="#0f172a" />
-      </LinearGradient>
-    </Defs>
-    <Circle cx="12" cy="7.2" r="4.2" fill="url(#clubGrad)" />
-    <Circle cx="7.8" cy="14" r="4.2" fill="url(#clubGrad)" />
-    <Circle cx="16.2" cy="14" r="4.2" fill="url(#clubGrad)" />
-    <Circle cx="12" cy="12.2" r="3.8" fill="url(#clubGrad)" />
-    <Path
-      d="M11 13.5 C11 16.5 9.8 19.5 8.5 22 L15.5 22 C14.2 19.5 13 16.5 13 13.5 Z"
-      fill="url(#clubGrad)"
-    />
-  </Svg>
-);
-
-const ItalianDenariIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="goldCoinGrad" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0%" stopColor="#fde047" />
-        <Stop offset="50%" stopColor="#eab308" />
-        <Stop offset="100%" stopColor="#ca8a04" />
-      </LinearGradient>
-    </Defs>
-    <Circle cx="12" cy="12" r="10" fill="url(#goldCoinGrad)" stroke="#854d0e" strokeWidth="1.5" />
-    <Circle cx="12" cy="12" r="6" fill="none" stroke="#713f12" strokeWidth="1" strokeDasharray="2,2" />
-    <Circle cx="12" cy="12" r="3" fill="#ca8a04" />
-    <Path d="M12 9v6 M9 12h6" stroke="#854d0e" strokeWidth="1" />
-  </Svg>
-);
-
-const ItalianCoppeIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="cupGrad" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0%" stopColor="#ef4444" />
-        <Stop offset="100%" stopColor="#b91c1c" />
-      </LinearGradient>
-    </Defs>
-    <Path
-      d="M5 4h14v5c0 3.87-3.13 7-7 7s-7-3.13-7-7V4z"
-      fill="url(#cupGrad)"
-      stroke="#7f1d1d"
-      strokeWidth="1.2"
-    />
-    <Path d="M11 16h2v4h-2z" fill="#b91c1c" stroke="#7f1d1d" strokeWidth="1" />
-    <Path d="M7 20h10v2H7z" fill="#991b1b" stroke="#7f1d1d" strokeWidth="1" />
-    <Circle cx="12" cy="8" r="2" fill="#fde047" />
-  </Svg>
-);
-
-const ItalianSpadeIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="swordGrad" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0%" stopColor="#60a5fa" />
-        <Stop offset="100%" stopColor="#1e3a8a" />
-      </LinearGradient>
-    </Defs>
-    <Path
-      d="M6 18c3-4 6-9 12-14 0 5-5 11-9 14l-3 0z"
-      fill="url(#swordGrad)"
-      stroke="#1e3a8a"
-      strokeWidth="1"
-    />
-    <Path d="M4 19l4-4" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" />
-    <Circle cx="4" cy="20" r="1.5" fill="#b45309" />
-  </Svg>
-);
-
-const ItalianBastoniIcon: React.FC<{ size: number }> = ({ size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Defs>
-      <LinearGradient id="stickGrad" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0%" stopColor="#22c55e" />
-        <Stop offset="100%" stopColor="#15803d" />
-      </LinearGradient>
-    </Defs>
-    <Path
-      d="M5 19l14-14c.7.7.7 1.8 0 2.5l-14 14c-.7-.7-.7-1.8 0-2.5z"
-      fill="url(#stickGrad)"
-      stroke="#166534"
-      strokeWidth="1.2"
-    />
-    <Circle cx="8" cy="14" r="1.5" fill="#f59e0b" />
-    <Circle cx="12" cy="10" r="1.5" fill="#f59e0b" />
-    <Circle cx="16" cy="6" r="1.5" fill="#f59e0b" />
-  </Svg>
-);
-
 export const SuitIcon: React.FC<SuitIconProps> = ({
   suit,
   size = 18,
-  deckStyle = 'genovesi',
 }) => {
-  const norm = (suit || '').toLowerCase();
-  const isRegional = deckStyle === 'piacentine' || deckStyle === 'napoletane';
-
-  if (isRegional) {
-    switch (norm) {
-      case 'denari':
-        return <ItalianDenariIcon size={size} />;
-      case 'coppe':
-        return <ItalianCoppeIcon size={size} />;
-      case 'spade':
-        return <ItalianSpadeIcon size={size} />;
-      case 'bastoni':
-        return <ItalianBastoniIcon size={size} />;
-      default:
-        break;
-    }
-  }
-
-  // Base / Default deck: French suits (Carte Genovesi con segni francesi)
-  // "le carte genovesi hanno i segni come quelle francesi, solo forse i quadri si chiamano denari, per il resto uguale"
-  switch (norm) {
-    case 'quadri':
-    case 'denari':
-      return <FrenchDiamondIcon size={size} />;
-    case 'cuori':
-      return <FrenchHeartIcon size={size} />;
-    case 'picche':
-      return <FrenchSpadeIcon size={size} />;
-    case 'fiori':
-      return <FrenchClubIcon size={size} />;
-    case 'coppe':
-      return <ItalianCoppeIcon size={size} />;
-    case 'spade':
-      return <ItalianSpadeIcon size={size} />;
-    case 'bastoni':
-      return <ItalianBastoniIcon size={size} />;
-    default:
-      return <FrenchDiamondIcon size={size} />;
-  }
+  return <SuitSymbol suit={suit} size={size} />;
 };
+
 
 const FigureArtwork: React.FC<{
   rank: number;
@@ -332,11 +149,12 @@ const PipLayout: React.FC<{
   );
 };
 
-export const CardView: React.FC<CardViewProps> = ({
+const CardViewBase: React.FC<CardViewProps> = ({
   card,
   faceDown = false,
   deckStyle = 'genovesi',
-  graphicStyle = 'moderno',
+  graphicStyle = 'genovesi_autentiche',
+  deckSkinId,
   isSelected = false,
   isPlayable = false,
   isHighlighted = false,
@@ -347,9 +165,17 @@ export const CardView: React.FC<CardViewProps> = ({
 }) => {
   const [imageLoadError, setImageLoadError] = useState(false);
 
-  const isGenovesiDeck = deckStyle === 'genovesi';
-  const useGenovesiBack = isGenovesiDeck && graphicStyle !== 'moderno';
-  const genovesiBack = useGenovesiBack ? getGenovesiCardBack() : null;
+  // Determine active skin
+  const activeSkinId: DeckSkinId =
+    deckSkinId ??
+    (graphicStyle === 'classico'
+      ? 'classico_poker'
+      : graphicStyle === 'moderno'
+      ? 'moderno'
+      : 'genovesi_dal_negro');
+
+  const useSkinBack = activeSkinId !== 'moderno';
+  const skinBack = useSkinBack ? getSkinCardBack(activeSkinId) : null;
 
   if (faceDown || !card) {
     return (
@@ -362,10 +188,10 @@ export const CardView: React.FC<CardViewProps> = ({
           style,
         ]}
       >
-        {genovesiBack ? (
+        {skinBack ? (
           <View style={styles.classicImageContainer}>
             <Image
-              source={genovesiBack}
+              source={skinBack}
               style={styles.classicCardImage}
               resizeMode="cover"
             />
@@ -413,16 +239,17 @@ export const CardView: React.FC<CardViewProps> = ({
     ? normSuit === 'coppe' || normSuit === 'denari'
     : normSuit === 'cuori' || normSuit === 'denari' || normSuit === 'quadri';
 
-  const showGenovesiImage =
-    (graphicStyle === 'genovesi_autentiche' ||
-      graphicStyle === undefined ||
-      (isGenovesiDeck && graphicStyle !== 'moderno' && graphicStyle !== 'classico')) &&
-    !imageLoadError;
-  const genovesiImg = showGenovesiImage ? getGenovesiCardImage(card) : null;
+  const isModernSkin = activeSkinId === 'moderno';
+  const isPokerSkin = activeSkinId === 'classico_poker';
 
-  const showClassicImage =
-    !genovesiImg && graphicStyle === 'classico' && !isRegional && !imageLoadError;
-  const classicImgUrl = showClassicImage ? getDeckOfCardsApiUrl(card) : '';
+  const skinImg =
+    !isModernSkin && !isPokerSkin && !imageLoadError
+      ? getSkinCardImage(activeSkinId, card)
+      : null;
+
+  const showClassicPoker =
+    isPokerSkin && !imageLoadError;
+  const classicImgUrl = showClassicPoker ? getDeckOfCardsApiUrl(card) : '';
 
   const cardContent = (
     <View
@@ -436,10 +263,10 @@ export const CardView: React.FC<CardViewProps> = ({
         style,
       ]}
     >
-      {genovesiImg ? (
+      {skinImg ? (
         <View style={styles.classicImageContainer}>
           <Image
-            source={genovesiImg}
+            source={skinImg}
             style={styles.classicCardImage}
             resizeMode="contain"
             onError={() => setImageLoadError(true)}
@@ -450,7 +277,7 @@ export const CardView: React.FC<CardViewProps> = ({
             </View>
           )}
         </View>
-      ) : showClassicImage && classicImgUrl ? (
+      ) : showClassicPoker && classicImgUrl ? (
         <View style={styles.classicImageContainer}>
           <Image
             source={{ uri: classicImgUrl }}
@@ -517,13 +344,13 @@ export const CardView: React.FC<CardViewProps> = ({
       {/* Badges for special cards: Settebello & Matta */}
       {isSettebelloCard && (
         <View style={styles.settebelloBadge}>
-          <Text style={styles.badgeText}>★ 7 BELLO</Text>
+          <Text style={styles.badgeText}>7 BELLO</Text>
         </View>
       )}
 
       {cardIsMatta && (
         <View style={styles.mattaBadge}>
-          <Text style={styles.mattaBadgeText}>🃏 MATTA</Text>
+          <Text style={styles.mattaBadgeText}>MATTA</Text>
         </View>
       )}
     </View>
@@ -531,18 +358,25 @@ export const CardView: React.FC<CardViewProps> = ({
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        activeOpacity={0.82}
+      <Pressable
         onPress={onPress}
-        style={[isSelected && { transform: [{ translateY: -10 }] }]}
+        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        style={({ pressed }) => [
+          isSelected && { transform: [{ translateY: -10 }] },
+          pressed && { opacity: 0.88 },
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel={`${card.name}${isSettebelloCard ? ', Settebello' : ''}${cardIsMatta ? ', La Matta' : ''}`}
       >
         {cardContent}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   return cardContent;
 };
+
+export const CardView = React.memo(CardViewBase);
 
 const styles = StyleSheet.create({
   card: {

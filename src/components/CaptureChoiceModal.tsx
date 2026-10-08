@@ -1,12 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { CardView } from './CardView';
-import { CaptureMove, DeckStyle } from '../types/card';
+import { CaptureMove, DeckSkinId, DeckStyle } from '../types/card';
+import { AppModal } from './common/AppModal';
+import { AppBadge } from './common/AppBadge';
+import { theme } from '../theme/tokens';
 
 interface CaptureChoiceModalProps {
   visible: boolean;
   moves: CaptureMove[];
   deckStyle?: DeckStyle;
+  deckSkinId?: DeckSkinId;
   onSelectMove: (move: CaptureMove) => void;
   onCancel: () => void;
 }
@@ -15,166 +19,146 @@ export const CaptureChoiceModal: React.FC<CaptureChoiceModalProps> = ({
   visible,
   moves,
   deckStyle,
+  deckSkinId,
   onSelectMove,
   onCancel,
 }) => {
   if (!visible || moves.length === 0) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.backdrop}>
-        <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Scegli la Presa</Text>
-          <Text style={styles.modalSub}>
-            Hai più combinazioni possibili con questa carta:
-          </Text>
+    <AppModal
+      visible={visible}
+      onClose={onCancel}
+      title="Scegli la Presa"
+      subtitle="Hai più combinazioni possibili di presa con questa carta."
+      icon="layers-outline"
+      iconColor={theme.colors.primaryLight}
+      maxWidth={440}
+      contentContainerStyle={styles.content}
+      footer={
+        <Pressable
+          style={({ pressed }) => [
+            styles.cancelBtn,
+            pressed && styles.cancelBtnPressed,
+          ]}
+          hitSlop={theme.touch.hitSlop}
+          onPress={onCancel}
+          accessibilityRole="button"
+          accessibilityLabel="Annulla selezione presa"
+        >
+          <Text style={styles.cancelBtnText}>Annulla selezione</Text>
+        </Pressable>
+      }
+    >
+      <View style={styles.movesList}>
+        {moves.map((move, index) => {
+          let reason = '';
+          if (move.isAceSweep) reason = 'Asso pigliatutto (svuota tavolo)';
+          else if (move.is15Sum) reason = `Regola del 15 (${move.cardPlayed.value} + ${15 - move.cardPlayed.value} = 15)`;
+          else if (move.isDirectMatch) reason = `Presa d'uguale (${move.cardPlayed.name})`;
+          else reason = `Presa per somma pari a ${move.cardPlayed.value}`;
 
-          <ScrollView style={styles.scrollList} contentContainerStyle={styles.scrollContent}>
-            {moves.map((move, index) => {
-              let reason = '';
-              if (move.isAceSweep) reason = 'Asso Pigliatutto (Tutto il tavolo)';
-              else if (move.is15Sum) reason = `Regola del 15 (${move.cardPlayed.value} + ${15 - move.cardPlayed.value} = 15)`;
-              else if (move.isDirectMatch) reason = `Presa d'uguale (${move.cardPlayed.name})`;
-              else reason = `Presa per somma pari a ${move.cardPlayed.value}`;
+          return (
+            <Pressable
+              key={`move-choice-${index}`}
+              style={({ pressed }) => [
+                styles.moveOption,
+                move.isScopa && styles.moveOptionScopa,
+                pressed && styles.moveOptionPressed,
+              ]}
+              hitSlop={theme.touch.hitSlop}
+              onPress={() => onSelectMove(move)}
+              accessibilityRole="button"
+              accessibilityLabel={`Scegli presa: ${reason}`}
+            >
+              <View style={styles.moveHeader}>
+                <Text style={styles.moveReason}>{reason}</Text>
+                {move.isScopa && (
+                  <AppBadge label="Scopa (+1 pt)" variant="gold" size="sm" icon="star" />
+                )}
+              </View>
 
-              return (
-                <TouchableOpacity
-                  key={`move-choice-${index}`}
-                  style={[
-                    styles.moveOption,
-                    move.isScopa && styles.moveOptionScopa,
-                  ]}
-                  activeOpacity={0.8}
-                  onPress={() => onSelectMove(move)}
-                >
-                  <View style={styles.moveHeader}>
-                    <Text style={styles.moveReason}>{reason}</Text>
-                    {move.isScopa && (
-                      <View style={styles.scopaBadge}>
-                        <Text style={styles.scopaBadgeText}>★ SCOPA</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View style={styles.cardsRow}>
-                    <Text style={styles.arrowIcon}>Prendi:</Text>
-                    {move.capturedCards.map((c, cIdx) => (
-                      <CardView
-                        key={`choice-card-${c.id}-${cIdx}`}
-                        card={c}
-                        deckStyle={deckStyle}
-                        width={46}
-                        height={66}
-                      />
-                    ))}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
-            <Text style={styles.cancelBtnText}>Annulla selezione</Text>
-          </TouchableOpacity>
-        </View>
+              <View style={styles.cardsRow}>
+                <Text style={styles.arrowIcon}>Prendi:</Text>
+                {move.capturedCards.map((c, cIdx) => (
+                  <CardView
+                    key={`choice-card-${c.id}-${cIdx}`}
+                    card={c}
+                    deckStyle={deckStyle}
+                    deckSkinId={deckSkinId}
+                    width={46}
+                    height={66}
+                  />
+                ))}
+              </View>
+            </Pressable>
+          );
+        })}
       </View>
-    </Modal>
+    </AppModal>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+  content: {
+    gap: theme.spacing.md,
   },
-  modalCard: {
-    backgroundColor: '#0f172a',
-    borderRadius: 20,
-    width: '100%',
-    maxWidth: 380,
-    maxHeight: '80%',
-    padding: 18,
-    borderWidth: 1.5,
-    borderColor: '#334155',
-  },
-  modalTitle: {
-    color: '#f8fafc',
-    fontSize: 20,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  modalSub: {
-    color: '#94a3b8',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 14,
-  },
-  scrollList: {
-    maxHeight: 340,
-  },
-  scrollContent: {
-    gap: 10,
+  movesList: {
+    gap: theme.spacing.md,
   },
   moveOption: {
-    backgroundColor: '#1e293b',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: theme.colors.surfaceSubtle,
+    borderRadius: theme.radii.lg,
+    padding: theme.spacing.md,
     borderWidth: 1,
-    borderColor: '#475569',
+    borderColor: theme.colors.cardBorder,
   },
   moveOptionScopa: {
-    borderColor: '#eab308',
-    backgroundColor: 'rgba(234, 179, 8, 0.1)',
+    borderColor: 'rgba(245, 158, 11, 0.4)',
+    backgroundColor: 'rgba(217, 119, 6, 0.06)',
+  },
+  moveOptionPressed: {
+    opacity: 0.8,
   },
   moveHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing.sm,
+    gap: theme.spacing.sm,
   },
   moveReason: {
-    color: '#38bdf8',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
+    color: theme.colors.textPrimary,
     flex: 1,
-  },
-  scopaBadge: {
-    backgroundColor: '#eab308',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  scopaBadgeText: {
-    color: '#0f172a',
-    fontSize: 10,
-    fontWeight: '900',
   },
   cardsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    flexWrap: 'wrap',
+    gap: 8,
   },
   arrowIcon: {
-    color: '#cbd5e1',
-    fontSize: 12,
-    fontWeight: '700',
-    marginRight: 4,
+    fontSize: 11,
+    fontWeight: '600',
+    color: theme.colors.textMuted,
+    marginRight: 2,
   },
   cancelBtn: {
-    marginTop: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: '#334155',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    minHeight: 40,
+  },
+  cancelBtnPressed: {
+    opacity: 0.7,
   },
   cancelBtnText: {
-    color: '#f8fafc',
+    color: theme.colors.textSecondary,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

@@ -23,7 +23,7 @@
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(circle at top, #1e2e4a 0%, #090d16 100%);
+      background: #090e17;
       color: var(--text);
       padding: 24px 16px;
       min-height: 100vh;
@@ -53,9 +53,7 @@
       font-size: 32px;
       font-weight: 900;
       letter-spacing: 0.5px;
-      background: linear-gradient(135deg, #fef08a, #f59e0b, #ef4444);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #f8fafc;
       margin-bottom: 8px;
     }
     p.subtitle {
@@ -299,22 +297,22 @@
         <span>Vale 10 per prese e bussate</span>
       </div>
       <div class="rule-item">
-        <span class="rule-badge" style="background:#d97706;">★ 7 BELLO</span>
-        <span>7♦ vale 1 punto di mazzo</span>
+        <span class="rule-badge" style="background:#d97706;">7 BELLO</span>
+        <span>7 Denari vale 1 punto di mazzo</span>
       </div>
       <div class="rule-item">
-        <span class="rule-badge" style="background:#7c3aed;">🃏 LA MATTA</span>
-        <span>7♥ jolly nelle combinazioni</span>
+        <span class="rule-badge" style="background:#0284c7;">LA MATTA</span>
+        <span>7 Cuori jolly nelle combinazioni</span>
       </div>
     </div>
 
     <!-- Switcher Stile -->
     <div class="switcher-row">
       <button class="switch-btn active" id="btn-genovesi" onclick="switchDeck('genovesi')">
-        🏛️ Carte Genovesi Storiche (Baccarat - Dal Negro)
+        Carte Genovesi Storiche (Baccarat - Dal Negro)
       </button>
-      <button class="switch-btn" id="btn-poker" onclick="switchDeck('poker')">
-        🃏 Carte Francesi Classiche (Poker)
+      <button class="switch-btn" id="poker-btn" onclick="switchDeck('poker')">
+        Carte Francesi Classiche (Poker)
       </button>
     </div>
 

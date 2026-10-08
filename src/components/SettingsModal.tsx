@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Switch, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { DeckStyle, AIDifficulty, GameSettings } from '../types/card';
+import { DeckStyle, AIDifficulty, GameSettings, CardGraphicStyle } from '../types/card';
+import { AppModal } from './common/AppModal';
+import { PillButton } from './common/PillButton';
+import { theme } from '../theme/tokens';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -10,6 +13,7 @@ interface SettingsModalProps {
   onClose: () => void;
   onRestartMatch: () => void;
   onOpenDeckGallery?: () => void;
+  onOpenDeckSkins?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -19,355 +23,310 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onRestartMatch,
   onOpenDeckGallery,
+  onOpenDeckSkins,
 }) => {
-  if (!visible) return null;
-
   const update = (partial: Partial<GameSettings>) => {
     onUpdateSettings({ ...settings, ...partial });
   };
 
+  const deckStyles: { id: DeckStyle; label: string }[] = [
+    { id: 'genovesi', label: 'Genovesi' },
+    { id: 'piacentine', label: 'Piacentine' },
+    { id: 'napoletane', label: 'Napoletane' },
+  ];
+
+  const graphicStyles: { id: CardGraphicStyle; label: string }[] = [
+    { id: 'genovesi_autentiche', label: 'Genovesi Storiche' },
+    { id: 'moderno', label: 'Vettoriale Cirulla' },
+    { id: 'classico', label: 'Francesi Poker' },
+  ];
+
+  const difficulties: { id: AIDifficulty; label: string }[] = [
+    { id: 'facile', label: 'Facile' },
+    { id: 'normale', label: 'Normale' },
+    { id: 'campione', label: 'Campione' },
+  ];
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.modalCard}>
-          <View style={styles.headerRow}>
-            <Text style={styles.headerTitle}>Impostazioni</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={24} color="#94a3b8" />
-            </TouchableOpacity>
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Impostazioni"
+      subtitle="Mazzo di gioco, grafica, difficoltà e preferenze"
+      icon="settings-outline"
+      iconColor={theme.colors.primaryLight}
+      maxWidth={520}
+      contentContainerStyle={styles.content}
+    >
+      {/* Traditional Deck Style */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Mazzo Regionale</Text>
+        <View style={styles.pillRow}>
+          {deckStyles.map((item) => (
+            <PillButton
+              key={item.id}
+              label={item.label}
+              isActive={settings.deckStyle === item.id}
+              onPress={() => update({ deckStyle: item.id })}
+            />
+          ))}
+        </View>
+        <Text style={styles.sectionHint}>
+          {settings.deckStyle === 'genovesi'
+            ? 'Regole liguri: semi francesi (Cuori, Denari, Picche, Fiori).'
+            : 'Semi regionali italiani tradizionali (Coppe, Denari, Spade, Bastoni).'}
+        </Text>
+      </View>
+
+      {/* Skin & Altervista Browser Nav Button */}
+      {onOpenDeckSkins && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.skinsNavBtn,
+            pressed && styles.navBtnPressed,
+          ]}
+          onPress={() => {
+            onClose();
+            onOpenDeckSkins();
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Apri catalogo skin mazzi"
+        >
+          <View style={styles.skinsNavIconBox}>
+            <Ionicons name="color-palette-outline" size={20} color={theme.colors.accentGoldLight} />
           </View>
+          <View style={styles.skinsNavTextWrap}>
+            <Text style={styles.skinsNavTitle}>Scegli Skin del Mazzo</Text>
+            <Text style={styles.skinsNavSubtitle}>
+              Attivo: {settings.deckSkinId === 'genovesi_dal_negro' || !settings.deckSkinId ? 'Genovesi Dal Negro (Predefinito)' : settings.deckSkinId}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+      )}
 
-          <ScrollView style={styles.scrollList} contentContainerStyle={styles.scrollContent}>
-            {/* Stile Mazzo di Carte */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Mazzo Tradizionale</Text>
-              <View style={styles.pillRow}>
-                {(['genovesi', 'piacentine', 'napoletane'] as DeckStyle[]).map((ds) => (
-                  <TouchableOpacity
-                    key={ds}
-                    style={[
-                      styles.pillBtn,
-                      settings.deckStyle === ds && styles.pillBtnActive,
-                    ]}
-                    onPress={() => update({ deckStyle: ds })}
-                  >
-                    <Text
-                      style={[
-                        styles.pillText,
-                        settings.deckStyle === ds && styles.pillTextActive,
-                      ]}
-                    >
-                      {ds.charAt(0).toUpperCase() + ds.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <Text style={styles.deckHintText}>
-                {settings.deckStyle === 'genovesi'
-                  ? 'Base tradizionale: segni francesi (Cuori ♥, Denari ♦, Picche ♠, Fiori ♣).'
-                  : 'Semi regionali italiani: Coppe 🏆, Denari 🪙, Spade ⚔, Bastoni 🪵.'}
-              </Text>
-            </View>
-
-            {/* Aspetto Grafico Carte */}
-            {settings.deckStyle === 'genovesi' && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Aspetto Grafico Carte Genovesi</Text>
-                <View style={styles.pillRow}>
-                  <TouchableOpacity
-                    style={[
-                      styles.pillBtn,
-                      (settings.cardGraphicStyle ?? 'genovesi_autentiche') === 'genovesi_autentiche' && styles.pillBtnActive,
-                    ]}
-                    onPress={() => update({ cardGraphicStyle: 'genovesi_autentiche' })}
-                  >
-                    <Text
-                      style={[
-                        styles.pillText,
-                        (settings.cardGraphicStyle ?? 'genovesi_autentiche') === 'genovesi_autentiche' && styles.pillTextActive,
-                      ]}
-                    >
-                      Genovesi Storiche (Baccarat)
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.pillBtn,
-                      settings.cardGraphicStyle === 'moderno' && styles.pillBtnActive,
-                    ]}
-                    onPress={() => update({ cardGraphicStyle: 'moderno' })}
-                  >
-                    <Text
-                      style={[
-                        styles.pillText,
-                        settings.cardGraphicStyle === 'moderno' && styles.pillTextActive,
-                      ]}
-                    >
-                      Vettoriale Moderno
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.pillBtn,
-                      settings.cardGraphicStyle === 'classico' && styles.pillBtnActive,
-                    ]}
-                    onPress={() => update({ cardGraphicStyle: 'classico' })}
-                  >
-                    <Text
-                      style={[
-                        styles.pillText,
-                        settings.cardGraphicStyle === 'classico' && styles.pillTextActive,
-                      ]}
-                    >
-                      Francesi Classiche
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            {/* Bottone Campionario Layout Carte */}
-            {onOpenDeckGallery && (
-              <TouchableOpacity
-                style={styles.galleryNavBtn}
-                onPress={() => {
-                  onClose();
-                  onOpenDeckGallery();
-                }}
-              >
-                <Ionicons name="images-outline" size={18} color="#38bdf8" />
-                <Text style={styles.galleryNavText}>Mostra Tutti i 40 Layout delle Carte</Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Punteggio Obiettivo */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Punteggio Vittoria</Text>
-              <View style={styles.pillRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.pillBtn,
-                    settings.targetScore === 51 && styles.pillBtnActive,
-                  ]}
-                  onPress={() => update({ targetScore: 51 })}
-                >
-                  <Text
-                    style={[
-                      styles.pillText,
-                      settings.targetScore === 51 && styles.pillTextActive,
-                    ]}
-                  >
-                    51 Punti (Classico)
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.pillBtn,
-                    settings.targetScore === 31 && styles.pillBtnActive,
-                  ]}
-                  onPress={() => update({ targetScore: 31 })}
-                >
-                  <Text
-                    style={[
-                      styles.pillText,
-                      settings.targetScore === 31 && styles.pillTextActive,
-                    ]}
-                  >
-                    31 Punti (Rapido)
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Difficoltà IA */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Abilità Avversario (IA)</Text>
-              <View style={styles.pillRow}>
-                {(['facile', 'normale', 'campione'] as AIDifficulty[]).map((diff) => (
-                  <TouchableOpacity
-                    key={diff}
-                    style={[
-                      styles.pillBtn,
-                      settings.aiDifficulty === diff && styles.pillBtnActive,
-                    ]}
-                    onPress={() => update({ aiDifficulty: diff })}
-                  >
-                    <Text
-                      style={[
-                        styles.pillText,
-                        settings.aiDifficulty === diff && styles.pillTextActive,
-                      ]}
-                    >
-                      {diff.charAt(0).toUpperCase() + diff.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Toggle Suoni e Aptica */}
-            <View style={styles.toggleRow}>
-              <View>
-                <Text style={styles.toggleLabel}>Effetti Sonori</Text>
-                <Text style={styles.toggleSub}>Suoni carte, prese e fanfara</Text>
-              </View>
-              <Switch
-                value={settings.soundEnabled}
-                onValueChange={(val) => update({ soundEnabled: val })}
-                trackColor={{ false: '#334155', true: '#0284c7' }}
-                thumbColor={settings.soundEnabled ? '#38bdf8' : '#94a3b8'}
+      {/* Card Visual Style for Genovesi */}
+      {settings.deckStyle === 'genovesi' && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Stile Grafico Carte</Text>
+          <View style={styles.pillRow}>
+            {graphicStyles.map((item) => (
+              <PillButton
+                key={item.id}
+                label={item.label}
+                isActive={(settings.cardGraphicStyle ?? 'genovesi_autentiche') === item.id}
+                onPress={() => update({ cardGraphicStyle: item.id })}
               />
-            </View>
+            ))}
+          </View>
+        </View>
+      )}
 
-            <View style={styles.toggleRow}>
-              <View>
-                <Text style={styles.toggleLabel}>Feedback Aptico (Vibrazione)</Text>
-                <Text style={styles.toggleSub}>Vibrazione su giocata e scopa</Text>
-              </View>
-              <Switch
-                value={settings.hapticsEnabled}
-                onValueChange={(val) => update({ hapticsEnabled: val })}
-                trackColor={{ false: '#334155', true: '#0284c7' }}
-                thumbColor={settings.hapticsEnabled ? '#38bdf8' : '#94a3b8'}
-              />
-            </View>
+      {/* Gallery Nav Button */}
+      {onOpenDeckGallery && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.galleryNavBtn,
+            pressed && styles.navBtnPressed,
+          ]}
+          onPress={() => {
+            onClose();
+            onOpenDeckGallery();
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Mostra tutti i 40 layout delle carte"
+        >
+          <Ionicons name="images-outline" size={18} color={theme.colors.primaryLight} />
+          <Text style={styles.galleryNavText}>Mostra tutti i 40 layout delle carte</Text>
+        </Pressable>
+      )}
 
-            {/* Reset / Nuova Partita */}
-            <TouchableOpacity
-              style={styles.restartBtn}
-              activeOpacity={0.8}
-              onPress={() => {
-                onRestartMatch();
-                onClose();
-              }}
-            >
-              <Ionicons name="refresh-outline" size={18} color="#fca5a5" />
-              <Text style={styles.restartBtnText}>Ricomincia Partita da Zero</Text>
-            </TouchableOpacity>
-          </ScrollView>
+      {/* Target Score */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Punteggio Vittoria</Text>
+        <View style={styles.pillRow}>
+          <PillButton
+            label="51 Punti (Classico)"
+            isActive={settings.targetScore === 51}
+            onPress={() => update({ targetScore: 51 })}
+          />
+          <PillButton
+            label="31 Punti (Rapido)"
+            isActive={settings.targetScore === 31}
+            onPress={() => update({ targetScore: 31 })}
+          />
         </View>
       </View>
-    </Modal>
+
+      {/* AI Difficulty */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Livello Avversario</Text>
+        <View style={styles.pillRow}>
+          {difficulties.map((diff) => (
+            <PillButton
+              key={diff.id}
+              label={diff.label}
+              isActive={settings.aiDifficulty === diff.id}
+              onPress={() => update({ aiDifficulty: diff.id })}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Toggles */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Esperienza di Gioco</Text>
+
+        <View style={styles.toggleRow}>
+          <View>
+            <Text style={styles.toggleLabel}>Suoni ed Effetti Audio</Text>
+            <Text style={styles.toggleSub}>Feedback sonoro alla presa e alle scope</Text>
+          </View>
+          <Switch
+            value={settings.soundEnabled}
+            onValueChange={(val) => update({ soundEnabled: val })}
+            trackColor={{ false: theme.colors.surfaceSubtle, true: theme.colors.primary }}
+            thumbColor="#ffffff"
+          />
+        </View>
+
+        <View style={styles.toggleRow}>
+          <View>
+            <Text style={styles.toggleLabel}>Vibrazione (Feedback Aptico)</Text>
+            <Text style={styles.toggleSub}>Vibrazione durante prese e smazzate</Text>
+          </View>
+          <Switch
+            value={settings.hapticsEnabled}
+            onValueChange={(val) => update({ hapticsEnabled: val })}
+            trackColor={{ false: theme.colors.surfaceSubtle, true: theme.colors.primary }}
+            thumbColor="#ffffff"
+          />
+        </View>
+
+        <View style={styles.toggleRow}>
+          <View>
+            <Text style={styles.toggleLabel}>Selezione Rapida Presa Migliore</Text>
+            <Text style={styles.toggleSub}>Pre-seleziona la presa ottimale</Text>
+          </View>
+          <Switch
+            value={settings.autoSelectBestCapture}
+            onValueChange={(val) => update({ autoSelectBestCapture: val })}
+            trackColor={{ false: theme.colors.surfaceSubtle, true: theme.colors.primary }}
+            thumbColor="#ffffff"
+          />
+        </View>
+      </View>
+
+      {/* Restart match */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.restartBtn,
+          pressed && styles.restartBtnPressed,
+        ]}
+        onPress={() => {
+          onClose();
+          onRestartMatch();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="Ricomincia partita"
+      >
+        <Ionicons name="refresh" size={16} color={theme.colors.danger} />
+        <Text style={styles.restartBtnText}>Ricomincia nuova partita</Text>
+      </Pressable>
+    </AppModal>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalCard: {
-    backgroundColor: '#0f172a',
-    borderRadius: 24,
-    width: '100%',
-    maxWidth: 420,
-    maxHeight: '85%',
-    padding: 20,
-    borderWidth: 1.5,
-    borderColor: '#334155',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  headerTitle: {
-    color: '#f8fafc',
-    fontSize: 22,
-    fontWeight: '900',
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  scrollList: {
-    maxHeight: 460,
-  },
-  scrollContent: {
-    gap: 16,
+  content: {
+    gap: theme.spacing.xl,
   },
   section: {
-    gap: 8,
+    gap: theme.spacing.sm,
   },
   sectionTitle: {
-    color: '#cbd5e1',
     fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+    letterSpacing: 0.3,
+  },
+  sectionHint: {
+    fontSize: 11.5,
+    color: theme.colors.textMuted,
+    lineHeight: 16,
   },
   pillRow: {
     flexDirection: 'row',
-    gap: 8,
     flexWrap: 'wrap',
+    gap: theme.spacing.sm,
   },
-  pillBtn: {
-    flex: 1,
-    minWidth: 90,
-    backgroundColor: '#1e293b',
-    paddingVertical: 10,
-    borderRadius: 10,
+  skinsNavBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: theme.colors.surfaceSubtle,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.radii.lg,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: 'rgba(217, 119, 6, 0.3)',
+    gap: theme.spacing.md,
   },
-  pillBtnActive: {
-    backgroundColor: '#0284c7',
-    borderColor: '#38bdf8',
+  skinsNavIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: theme.radii.md,
+    backgroundColor: 'rgba(217, 119, 6, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  pillText: {
-    color: '#94a3b8',
-    fontSize: 12,
-    fontWeight: '700',
+  skinsNavTextWrap: {
+    flex: 1,
   },
-  pillTextActive: {
-    color: '#ffffff',
-    fontWeight: '900',
+  skinsNavTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
   },
-  deckHintText: {
-    color: '#94a3b8',
-    fontSize: 11,
-    marginTop: 4,
-    fontStyle: 'italic',
+  skinsNavSubtitle: {
+    fontSize: 11.5,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
   galleryNavBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#1e293b',
-    paddingVertical: 10,
-    borderRadius: 10,
+    backgroundColor: theme.colors.surfaceSubtle,
+    paddingVertical: 11,
+    borderRadius: theme.radii.md,
     borderWidth: 1,
-    borderColor: '#0284c7',
-    marginTop: 4,
+    borderColor: theme.colors.cardBorder,
   },
   galleryNavText: {
-    color: '#38bdf8',
+    color: theme.colors.primaryLight,
     fontSize: 12.5,
-    fontWeight: '800',
+    fontWeight: '700',
+  },
+  navBtnPressed: {
+    opacity: 0.8,
   },
   toggleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: theme.spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: '#1e293b',
+    borderTopColor: theme.colors.cardBorder,
   },
   toggleLabel: {
-    color: '#f8fafc',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.textPrimary,
   },
   toggleSub: {
-    color: '#64748b',
     fontSize: 11,
+    color: theme.colors.textMuted,
     marginTop: 2,
   },
   restartBtn: {
@@ -375,16 +334,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.4)',
-    borderRadius: 12,
     paddingVertical: 12,
-    marginTop: 8,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    backgroundColor: 'rgba(239, 68, 68, 0.06)',
+    minHeight: 44,
+  },
+  restartBtnPressed: {
+    opacity: 0.75,
   },
   restartBtnText: {
-    color: '#f87171',
-    fontSize: 14,
-    fontWeight: '800',
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

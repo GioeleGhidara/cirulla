@@ -1,23 +1,24 @@
-# 🃏 Cirulla - Gioco di Carte per iOS (App Store)
+# Cirulla - Gioco Tradizionale Ligure per Mobile
 
-Un'applicazione completa, autentica e pronta per la pubblicazione su **App Store** (iOS/iPadOS) dedicata al gioco tradizionale ligure della **Cirulla**.
+Un'applicazione curata, autentica e pronta per iOS e Android dedicata al gioco tradizionale ligure della **Cirulla**.
 
-Sviluppata con **React Native + Expo SDK 57**, TypeScript, grafica vettoriale nitida ad alta risoluzione, audio ed effetti sonori realistici, feedback aptico e un motore di Intelligenza Artificiale progettato per competere applicando le vere tattiche genovesi.
+Sviluppata con **React Native + Expo**, TypeScript, grafica vettoriale nitida ad alta risoluzione, audio ed effetti sonori realistici, feedback aptico e un motore tattico con intelligenza artificiale calibrato sulle regole autentiche genovesi.
 
 ---
 
-## 🌟 Caratteristiche Principali
+## Caratteristiche Principali
 
 - **Regole Autentiche di Cirulla**:
-  - **Il Monte**: Controllo iniziale delle 4 carte a terra (se la somma è 15 assegna 1 Scopa al mazziere, se è 30 assegna 2 Scope!).
+  - **Valori delle Figure**: Fante (Jack) = 8, Donna (Cavallo) = 9, Re = 10.
+  - **Il Monte**: Controllo iniziale delle 4 carte a terra (se la somma è 15 assegna 1 Scopa al mazziere, se è 30 assegna 2 Scope).
   - **Accuse di Mano**: Valutazione automatica all'inizio di ogni mano da 3 carte:
     - *Buona da tre* (somma $\le 9$): +3 punti immediati con carte scoperte.
     - *Buona da dieci* (tris di carte uguali): +10 punti immediati.
-    - *La Matta (7 di Picche)*: assume il valore più favorevole da 1 a 10 per completare o migliorare l'accusa.
+    - *La Matta (7 di Cuori)*: assume il valore più favorevole da 1 a 10 per completare o migliorare l'accusa.
   - **Prese del 15**: Calcolo di tutte le combinazioni a somma 15 con la carta giocata.
   - **Presa d'Uguale**: Possibilità di prendere carte dello stesso valore.
-  - **Asso Pigliatutto**: L'Asso prende tutto il tavolo facendo Scopa (se c'è già un Asso a terra, prende solo l'Asso).
-  - **Punti di Mazzo**: Carte (>20), Quadri (>5), Settebello (7♦), Primiera completa con valori tradizionali, Piccola Quadri (fino a 7 pt) e Grande Quadri (8, 9, 10 di Quadri = 5 pt).
+  - **Asso Pigliatutto**: L'Asso prende tutto il tavolo facendo Scopa (oppure somma 15 se presente).
+  - **Punti di Mazzo**: Carte (>20), Denari (>5), Settebello (7 di Denari), Primiera completa con valori tradizionali, Piccola Denari (fino a 7 pt) e Grande Denari (8, 9, 10 di Denari = 5 pt).
 - **Intelligenza Artificiale Tattica a 3 Livelli**:
   - *Facile*: per principianti, con scelte intuitive.
   - *Normale*: valuta Quadri, Settebello e Scope.
@@ -35,7 +36,7 @@ Sviluppata con **React Native + Expo SDK 57**, TypeScript, grafica vettoriale ni
 
 ---
 
-## 🚀 Come Provare l'App Subito
+## Come Provare l'App Subito
 
 ### Opzione 1: Su iPhone / iPad con Expo Go (Consigliato)
 1. Installa l'app gratuita **Expo Go** dall'App Store sul tuo iPhone o iPad.
@@ -57,7 +58,7 @@ npx expo start --web
 
 ---
 
-## 🍏 Come Pubblicare su Apple App Store da Windows (EAS Build)
+## Come Pubblicare su Apple App Store da Windows (EAS Build)
 
 Grazie a **Expo Application Services (EAS)**, puoi compilare e inviare l'applicazione su App Store direttamente dal tuo PC Windows senza dover possedere un computer Mac:
 
@@ -91,7 +92,7 @@ npx eas-cli submit --platform ios
 
 ---
 
-## 🛠️ Comandi Utili per lo Sviluppo
+## Comandi Utili per lo Sviluppo
 
 ```bash
 # Controllo integrità TypeScript

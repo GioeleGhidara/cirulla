@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { DealScores } from '../types/card';
+import { AppModal } from './common/AppModal';
+import { theme } from '../theme/tokens';
 
 interface DealSummaryModalProps {
   visible: boolean;
@@ -65,279 +68,237 @@ export const DealSummaryModal: React.FC<DealSummaryModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.backdrop}>
-        <View style={styles.modalCard}>
-          <Text style={styles.headerTitle}>Fine Smazzata</Text>
-          <Text style={styles.headerSub}>Riepilogo Punti del Mazzo</Text>
+    <AppModal
+      visible={visible}
+      onClose={onNextDeal}
+      title="Riepilogo Smazzata"
+      subtitle="Conteggio ufficiale dei punti del mazzo"
+      icon="list-circle-outline"
+      iconColor={theme.colors.accentGoldLight}
+      maxWidth={480}
+      contentContainerStyle={styles.content}
+      footer={
+        <Pressable
+          style={({ pressed }) => [
+            styles.continueBtn,
+            pressed && styles.continueBtnPressed,
+          ]}
+          hitSlop={theme.touch.hitSlop}
+          onPress={onNextDeal}
+          accessibilityRole="button"
+          accessibilityLabel={isMatchOver ? 'Vedi verdetto finale' : 'Continua partita'}
+        >
+          <Text style={styles.continueBtnText}>
+            {isMatchOver ? 'Vedi Verdetto Finale' : 'Continua Partita'}
+          </Text>
+          <Ionicons name="arrow-forward" size={16} color="#ffffff" />
+        </Pressable>
+      }
+    >
+      {/* Player header */}
+      <View style={styles.playersBar}>
+        <Text style={styles.playerName}>TU</Text>
+        <Text style={styles.playerName}>AVVERSARIO</Text>
+      </View>
 
-          <View style={styles.playersBar}>
-            <Text style={styles.playerName}>TU</Text>
-            <Text style={styles.playerName}>AVVERSARIO</Text>
-          </View>
+      <View style={styles.scoresList}>
+        {renderRow('Carte (>20)', scores.cartePlayer, scores.carteAI, scores.cartePoint)}
+        {renderRow('Denari (>5)', scores.denariPlayer, scores.denariAI, scores.denariPoint)}
+        {renderRow(
+          'Settebello',
+          scores.settebelloPoint === 'player' ? '+1 pt' : '-',
+          scores.settebelloPoint === 'ai' ? '+1 pt' : '-',
+          scores.settebelloPoint
+        )}
+        {renderRow('Primiera', scores.primieraPlayer, scores.primieraAI, scores.primieraPoint)}
 
-          <ScrollView style={styles.scrollList} contentContainerStyle={styles.scrollContent}>
-            {/* Carte */}
-            {renderRow(
-              'Carte (>20)',
-              scores.cartePlayer,
-              scores.carteAI,
-              scores.cartePoint
-            )}
+        {(scores.piccolaPlayerPoints > 0 || scores.piccolaAIPoints > 0) &&
+          renderRow(
+            'Piccola (Denari)',
+            scores.piccolaPlayerPoints > 0 ? `+${scores.piccolaPlayerPoints} pt` : '-',
+            scores.piccolaAIPoints > 0 ? `+${scores.piccolaAIPoints} pt` : '-',
+            scores.piccolaPlayerPoints > scores.piccolaAIPoints ? 'player' : 'ai'
+          )}
 
-            {/* Denari */}
-            {renderRow(
-              'Denari (>5)',
-              scores.denariPlayer,
-              scores.denariAI,
-              scores.denariPoint
-            )}
+        {(scores.grandePlayerPoints > 0 || scores.grandeAIPoints > 0) &&
+          renderRow(
+            'Grande (Denari)',
+            scores.grandePlayerPoints > 0 ? '+5 pt' : '-',
+            scores.grandeAIPoints > 0 ? '+5 pt' : '-',
+            scores.grandePlayerPoints > scores.grandeAIPoints ? 'player' : 'ai'
+          )}
 
-            {/* Settebello */}
-            {renderRow(
-              'Settebello (7♦)',
-              scores.settebelloPoint === 'player' ? '+1 pt' : '-',
-              scores.settebelloPoint === 'ai' ? '+1 pt' : '-',
-              scores.settebelloPoint
-            )}
+        {renderRow(
+          'Scope',
+          scores.scopePlayer > 0 ? `+${scores.scopePlayer}` : '0',
+          scores.scopeAI > 0 ? `+${scores.scopeAI}` : '0',
+          scores.scopePlayer > scores.scopeAI ? 'player' : scores.scopeAI > scores.scopePlayer ? 'ai' : 'tie'
+        )}
 
-            {/* Primiera */}
-            {renderRow(
-              'Primiera',
-              scores.primieraPlayer,
-              scores.primieraAI,
-              scores.primieraPoint
-            )}
+        {renderRow(
+          'Accuse di mano',
+          scores.accusePlayerPoints > 0 ? `+${scores.accusePlayerPoints}` : '0',
+          scores.accuseAIPoints > 0 ? `+${scores.accuseAIPoints}` : '0',
+          scores.accusePlayerPoints > scores.accuseAIPoints ? 'player' : scores.accuseAIPoints > scores.accusePlayerPoints ? 'ai' : 'tie'
+        )}
+      </View>
 
-            {/* Piccola */}
-            {(scores.piccolaPlayerPoints > 0 || scores.piccolaAIPoints > 0) &&
-              renderRow(
-                'Piccola (Denari ♦)',
-                scores.piccolaPlayerPoints > 0 ? `+${scores.piccolaPlayerPoints} pt` : '-',
-                scores.piccolaAIPoints > 0 ? `+${scores.piccolaAIPoints} pt` : '-',
-                scores.piccolaPlayerPoints > scores.piccolaAIPoints ? 'player' : 'ai'
-              )}
+      {/* Smazzata Total */}
+      <View style={styles.dealTotalRow}>
+        <Text style={styles.dealTotalVal}>+{scores.totalDealPlayer} pt</Text>
+        <Text style={styles.dealTotalLabel}>Totale Smazzata</Text>
+        <Text style={styles.dealTotalVal}>+{scores.totalDealAI} pt</Text>
+      </View>
 
-            {/* Grande */}
-            {(scores.grandePlayerPoints > 0 || scores.grandeAIPoints > 0) &&
-              renderRow(
-                'Grande (Denari ♦)',
-                scores.grandePlayerPoints > 0 ? '+5 pt' : '-',
-                scores.grandeAIPoints > 0 ? '+5 pt' : '-',
-                scores.grandePlayerPoints > scores.grandeAIPoints ? 'player' : 'ai'
-              )}
-
-            {/* Scope */}
-            {renderRow(
-              'Scope',
-              scores.scopePlayer > 0 ? `+${scores.scopePlayer}` : '0',
-              scores.scopeAI > 0 ? `+${scores.scopeAI}` : '0',
-              scores.scopePlayer > scores.scopeAI ? 'player' : scores.scopeAI > scores.scopePlayer ? 'ai' : 'tie'
-            )}
-
-            {/* Accuse */}
-            {renderRow(
-              'Accuse di Mano',
-              scores.accusePlayerPoints > 0 ? `+${scores.accusePlayerPoints}` : '0',
-              scores.accuseAIPoints > 0 ? `+${scores.accuseAIPoints}` : '0',
-              scores.accusePlayerPoints > scores.accuseAIPoints ? 'player' : scores.accuseAIPoints > scores.accusePlayerPoints ? 'ai' : 'tie'
-            )}
-
-            {/* Smazzata Total */}
-            <View style={styles.dealTotalRow}>
-              <Text style={styles.dealTotalVal}>+{scores.totalDealPlayer} pt</Text>
-              <Text style={styles.dealTotalLabel}>Totale Smazzata</Text>
-              <Text style={styles.dealTotalVal}>+{scores.totalDealAI} pt</Text>
-            </View>
-
-            {/* Overall Match Total */}
-            <View style={styles.matchTotalBox}>
-              <View style={styles.matchScoreItem}>
-                <Text style={styles.matchScoreVal}>{playerTotal}</Text>
-                <Text style={styles.matchScoreLabel}>Tu</Text>
-              </View>
-              <View style={styles.matchCenter}>
-                <Text style={styles.matchScoreTitle}>PUNTEGGIO TOTALE</Text>
-                <Text style={styles.targetInfo}>Traguardo: {targetScore} pt</Text>
-              </View>
-              <View style={styles.matchScoreItem}>
-                <Text style={styles.matchScoreVal}>{aiTotal}</Text>
-                <Text style={styles.matchScoreLabel}>Avversario</Text>
-              </View>
-            </View>
-          </ScrollView>
-
-          <TouchableOpacity style={styles.continueBtn} activeOpacity={0.8} onPress={onNextDeal}>
-            <Text style={styles.continueBtnText}>
-              {isMatchOver ? 'Vedi Verdetto Finale' : 'Continua Partita'}
-            </Text>
-          </TouchableOpacity>
+      {/* Overall Match Total */}
+      <View style={styles.matchTotalBox}>
+        <View style={styles.matchScoreItem}>
+          <Text style={styles.matchScoreVal}>{playerTotal}</Text>
+          <Text style={styles.matchScoreLabel}>Tu</Text>
+        </View>
+        <View style={styles.matchCenter}>
+          <Text style={styles.matchScoreTitle}>Punteggio Partita</Text>
+          <Text style={styles.targetInfo}>Traguardo: {targetScore} pt</Text>
+        </View>
+        <View style={styles.matchScoreItem}>
+          <Text style={styles.matchScoreVal}>{aiTotal}</Text>
+          <Text style={styles.matchScoreLabel}>Avversario</Text>
         </View>
       </View>
-    </Modal>
+    </AppModal>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalCard: {
-    backgroundColor: '#0f172a',
-    borderRadius: 22,
-    width: '100%',
-    maxWidth: 420,
-    maxHeight: '85%',
-    padding: 18,
-    borderWidth: 1.5,
-    borderColor: '#334155',
-  },
-  headerTitle: {
-    color: '#f8fafc',
-    fontSize: 22,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  headerSub: {
-    color: '#94a3b8',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 2,
-    marginBottom: 12,
+  content: {
+    gap: theme.spacing.md,
   },
   playersBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    backgroundColor: '#1e293b',
-    borderRadius: 8,
-    marginBottom: 8,
+    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.cardBorder,
   },
   playerName: {
-    color: '#e2e8f0',
     fontSize: 11,
     fontWeight: '800',
+    color: theme.colors.textMuted,
     letterSpacing: 0.5,
   },
-  scrollList: {
-    maxHeight: 340,
-  },
-  scrollContent: {
-    paddingVertical: 2,
+  scoresList: {
+    gap: 4,
   },
   scoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 7,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
   },
   cellSide: {
-    width: 60,
-    alignItems: 'center',
+    flex: 1,
+    alignItems: 'flex-start',
   },
   cellRight: {
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   cellCenter: {
-    flex: 1,
+    flex: 2,
     alignItems: 'center',
   },
-  labelCategory: {
-    color: '#cbd5e1',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   valText: {
-    color: '#94a3b8',
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.textSecondary,
   },
   winText: {
-    color: '#22c55e',
-    fontWeight: '900',
-    fontSize: 14,
+    color: theme.colors.accentGoldLight,
+    fontWeight: '800',
+  },
+  labelCategory: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: theme.colors.textPrimary,
   },
   dealTotalRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1e293b',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginTop: 10,
-  },
-  dealTotalLabel: {
-    color: '#f8fafc',
-    fontSize: 13,
-    fontWeight: '800',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.surfaceSubtle,
+    borderRadius: theme.radii.md,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    marginTop: theme.spacing.xs,
   },
   dealTotalVal: {
-    color: '#38bdf8',
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '800',
+    color: theme.colors.success,
+  },
+  dealTotalLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.textMuted,
+    textTransform: 'uppercase',
   },
   matchTotalBox: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#111827',
-    borderWidth: 1.5,
-    borderColor: '#eab308',
-    borderRadius: 14,
-    padding: 12,
-    marginTop: 10,
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.card,
+    borderRadius: theme.radii.lg,
+    padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
   },
   matchScoreItem: {
     alignItems: 'center',
-    width: 70,
+    minWidth: 50,
   },
   matchScoreVal: {
-    color: '#f8fafc',
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '900',
+    color: theme.colors.textPrimary,
   },
   matchScoreLabel: {
-    color: '#94a3b8',
-    fontSize: 10,
-    fontWeight: '700',
-    marginTop: 2,
+    fontSize: 11,
+    fontWeight: '600',
+    color: theme.colors.textMuted,
   },
   matchCenter: {
     alignItems: 'center',
   },
   matchScoreTitle: {
-    color: '#eab308',
     fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 1,
+    fontWeight: '700',
+    color: theme.colors.textMuted,
+    textTransform: 'uppercase',
   },
   targetInfo: {
-    color: '#cbd5e1',
     fontSize: 11,
-    fontWeight: '600',
+    color: theme.colors.primaryLight,
     marginTop: 2,
   },
   continueBtn: {
-    marginTop: 14,
-    backgroundColor: '#0284c7',
-    borderRadius: 12,
-    paddingVertical: 12,
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#0284c7',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 12,
+    borderRadius: theme.radii.md,
+    minHeight: 44,
+  },
+  continueBtnPressed: {
+    opacity: 0.85,
   },
   continueBtnText: {
-    color: '#ffffff',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
+    color: '#ffffff',
   },
 });

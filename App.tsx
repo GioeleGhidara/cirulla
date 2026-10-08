@@ -17,6 +17,7 @@ import { SettingsModal } from './src/components/SettingsModal';
 import { RulesModal } from './src/components/RulesModal';
 import { StatsModal } from './src/components/StatsModal';
 import { DeckGalleryModal } from './src/components/DeckGalleryModal';
+import { DeckSkinsModal } from './src/components/DeckSkinsModal';
 
 export default function App() {
   const game = useCirullaGame();
@@ -25,6 +26,7 @@ export default function App() {
   const [isRulesVisible, setIsRulesVisible] = useState(false);
   const [isStatsVisible, setIsStatsVisible] = useState(false);
   const [isDeckGalleryVisible, setIsDeckGalleryVisible] = useState(false);
+  const [isDeckSkinsVisible, setIsDeckSkinsVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,11 +47,13 @@ export default function App() {
         onOpenRules={() => setIsRulesVisible(true)}
         onOpenStats={() => setIsStatsVisible(true)}
         onOpenDeckGallery={() => setIsDeckGalleryVisible(true)}
+        onOpenDeckSkins={() => setIsDeckSkinsVisible(true)}
       />
 
       <GameTable
         deckStyle={game.settings.deckStyle}
         graphicStyle={game.settings.cardGraphicStyle}
+        deckSkinId={game.settings.deckSkinId}
         playerHand={game.playerHand}
         aiHand={game.aiHand}
         aiHandRevealed={game.aiHandRevealed}
@@ -72,6 +76,7 @@ export default function App() {
         visible={game.isChoiceModalVisible}
         moves={game.choiceMoves}
         deckStyle={game.settings.deckStyle}
+        deckSkinId={game.settings.deckSkinId}
         onSelectMove={game.executeChosenCapture}
         onCancel={game.cancelChoiceModal}
       />
@@ -100,6 +105,7 @@ export default function App() {
         onClose={() => setIsSettingsVisible(false)}
         onRestartMatch={game.restartMatch}
         onOpenDeckGallery={() => setIsDeckGalleryVisible(true)}
+        onOpenDeckSkins={() => setIsDeckSkinsVisible(true)}
       />
 
       <RulesModal
@@ -119,8 +125,18 @@ export default function App() {
         onClose={() => setIsDeckGalleryVisible(false)}
         currentDeckStyle={game.settings.deckStyle}
         currentGraphicStyle={game.settings.cardGraphicStyle}
+        currentSkinId={game.settings.deckSkinId}
         onSelectGraphicStyle={(style) => game.updateSettings({ ...game.settings, cardGraphicStyle: style })}
         onSelectDeckStyle={(style) => game.updateSettings({ ...game.settings, deckStyle: style })}
+      />
+
+      <DeckSkinsModal
+        visible={isDeckSkinsVisible}
+        onClose={() => setIsDeckSkinsVisible(false)}
+        currentSkinId={game.settings.deckSkinId ?? 'genovesi_dal_negro'}
+        onSelectSkin={(skinId) => {
+          game.updateSettings({ ...game.settings, deckSkinId: skinId });
+        }}
       />
 
       <ScopaBanner
