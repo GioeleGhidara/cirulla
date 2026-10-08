@@ -13,14 +13,14 @@ Sviluppata con **React Native + Expo SDK 57**, TypeScript, grafica vettoriale ni
   - **Accuse di Mano**: Valutazione automatica all'inizio di ogni mano da 3 carte:
     - *Buona da tre* (somma $\le 9$): +3 punti immediati con carte scoperte.
     - *Buona da dieci* (tris di carte uguali): +10 punti immediati.
-    - *La Matta (7 di Spade)*: assume il valore più favorevole da 1 a 10 per completare o migliorare l'accusa.
+    - *La Matta (7 di Picche)*: assume il valore più favorevole da 1 a 10 per completare o migliorare l'accusa.
   - **Prese del 15**: Calcolo di tutte le combinazioni a somma 15 con la carta giocata.
   - **Presa d'Uguale**: Possibilità di prendere carte dello stesso valore.
   - **Asso Pigliatutto**: L'Asso prende tutto il tavolo facendo Scopa (se c'è già un Asso a terra, prende solo l'Asso).
-  - **Punti di Mazzo**: Carte (>20), Denari (>5), Settebello (7♦), Primiera completa con valori tradizionali, Piccola Denari (fino a 7 pt) e Grande Denari (8, 9, 10 di Denari = 5 pt).
+  - **Punti di Mazzo**: Carte (>20), Quadri (>5), Settebello (7♦), Primiera completa con valori tradizionali, Piccola Quadri (fino a 7 pt) e Grande Quadri (8, 9, 10 di Quadri = 5 pt).
 - **Intelligenza Artificiale Tattica a 3 Livelli**:
   - *Facile*: per principianti, con scelte intuitive.
-  - *Normale*: valuta Denari, Settebello e Scope.
+  - *Normale*: valuta Quadri, Settebello e Scope.
   - *Campione (Maestro Genovese)*: calcola combinazioni pericolose, difende la Piccola, evita scarti che concedono il 15 o l'Asso.
 - **Grafica e Stile Curato**:
   - Tavolo in panno verde feltro con sfumature eleganti.

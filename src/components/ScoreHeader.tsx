@@ -34,8 +34,8 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   onOpenRules,
   onOpenStats,
 }) => {
-  const playerDenari = playerCaptured.filter((c) => c.suit === 'denari').length;
-  const aiDenari = aiCaptured.filter((c) => c.suit === 'denari').length;
+  const playerQuadri = playerCaptured.filter((c) => c.suit === 'Quadri').length;
+  const aiQuadri = aiCaptured.filter((c) => c.suit === 'Quadri').length;
 
   return (
     <View style={styles.container}>
@@ -87,7 +87,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
           <Text style={styles.mainScore}>{playerScore}</Text>
           <View style={styles.statsMiniRow}>
             <Text style={styles.statsMiniText}>
-              🎴 {playerCaptured.length}  🟡 {playerDenari}
+              🎴 {playerCaptured.length}  🟡 {playerQuadri}
             </Text>
             {playerScope > 0 && (
               <View style={styles.scopaMiniBadge}>
@@ -116,7 +116,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
           <Text style={styles.mainScore}>{aiScore}</Text>
           <View style={styles.statsMiniRow}>
             <Text style={styles.statsMiniText}>
-              🎴 {aiCaptured.length}  🟡 {aiDenari}
+              🎴 {aiCaptured.length}  🟡 {aiQuadri}
             </Text>
             {aiScope > 0 && (
               <View style={[styles.scopaMiniBadge, styles.scopaAIBadge]}>

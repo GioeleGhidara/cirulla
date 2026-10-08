@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import Svg, { Path, Circle, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { Card, DeckStyle, Suit } from '../types/card';
-import { isMatta } from '../engine/rules';
+import { isMatta, isSettebello } from '../engine/rules';
 
 interface CardViewProps {
   card?: Card;
@@ -18,7 +18,9 @@ interface CardViewProps {
 }
 
 export const SuitIcon: React.FC<{ suit: Suit; size?: number }> = ({ suit, size = 18 }) => {
-  switch (suit) {
+  const norm = (suit || '').toLowerCase();
+  switch (norm) {
+    case 'quadri':
     case 'denari':
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -34,6 +36,7 @@ export const SuitIcon: React.FC<{ suit: Suit; size?: number }> = ({ suit, size =
           <Circle cx="12" cy="12" r="3" fill="#ca8a04" />
         </Svg>
       );
+    case 'cuori':
     case 'coppe':
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -54,6 +57,7 @@ export const SuitIcon: React.FC<{ suit: Suit; size?: number }> = ({ suit, size =
           <Circle cx="12" cy="8" r="2" fill="#fde047" />
         </Svg>
       );
+    case 'picche':
     case 'spade':
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -63,7 +67,6 @@ export const SuitIcon: React.FC<{ suit: Suit; size?: number }> = ({ suit, size =
               <Stop offset="100%" stopColor="#1e3a8a" />
             </LinearGradient>
           </Defs>
-          {/* Curved Genoese scimitar */}
           <Path
             d="M6 18c3-4 6-9 12-14 0 5-5 11-9 14l-3 0z"
             fill="url(#swordGrad)"
@@ -74,7 +77,9 @@ export const SuitIcon: React.FC<{ suit: Suit; size?: number }> = ({ suit, size =
           <Circle cx="4" cy="20" r="1.5" fill="#b45309" />
         </Svg>
       );
+    case 'fiori':
     case 'bastoni':
+    default:
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24">
           <Defs>
@@ -83,7 +88,6 @@ export const SuitIcon: React.FC<{ suit: Suit; size?: number }> = ({ suit, size =
               <Stop offset="100%" stopColor="#15803d" />
             </LinearGradient>
           </Defs>
-          {/* Ceremonial knotted baton */}
           <Path
             d="M5 19l14-14c.7.7.7 1.8 0 2.5l-14 14c-.7-.7-.7-1.8 0-2.5z"
             fill="url(#stickGrad)"
@@ -103,7 +107,7 @@ const FigureArtwork: React.FC<{ rank: number; suit: Suit; size: number }> = ({
   suit,
   size,
 }) => {
-  const label = rank === 8 ? 'FANTE' : rank === 9 ? 'CAVALLO' : 'RE';
+  const label = rank === 8 ? 'JACK' : rank === 9 ? 'DONNA' : 'RE';
   const subLabel = rank === 8 ? '8' : rank === 9 ? '9' : '10';
 
   return (
@@ -175,8 +179,10 @@ export const CardView: React.FC<CardViewProps> = ({
   }
 
   const isFigure = card.rank >= 8;
-  const isSettebello = card.suit === 'denari' && card.rank === 7;
+  const isSettebelloCard = isSettebello(card);
   const cardIsMatta = isMatta(card);
+  const normSuit = (card.suit || '').toLowerCase();
+  const isRed = normSuit === 'quadri' || normSuit === 'denari' || normSuit === 'cuori' || normSuit === 'coppe';
 
   const cardContent = (
     <View
@@ -195,9 +201,7 @@ export const CardView: React.FC<CardViewProps> = ({
         <Text
           style={[
             styles.rankText,
-            card.suit === 'denari' || card.suit === 'coppe'
-              ? styles.redText
-              : styles.blackText,
+            isRed ? styles.redText : styles.blackText,
           ]}
         >
           {card.rank}
@@ -220,7 +224,7 @@ export const CardView: React.FC<CardViewProps> = ({
       </View>
 
       {/* Badges for special cards: Settebello & Matta */}
-      {isSettebello && (
+      {isSettebelloCard && (
         <View style={styles.settebelloBadge}>
           <Text style={styles.badgeText}>★ 7 BELLO</Text>
         </View>
@@ -237,9 +241,7 @@ export const CardView: React.FC<CardViewProps> = ({
         <Text
           style={[
             styles.rankText,
-            card.suit === 'denari' || card.suit === 'coppe'
-              ? styles.redText
-              : styles.blackText,
+            isRed ? styles.redText : styles.blackText,
           ]}
         >
           {card.rank}

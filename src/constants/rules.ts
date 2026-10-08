@@ -6,8 +6,8 @@ export const PRIMIERA_VALUES: Record<number, number> = {
   4: 14,
   3: 13,
   2: 12,
-  8: 10, // Fante
-  9: 10, // Cavallo
+  8: 10, // Jack
+  9: 10, // Donna
   10: 10, // Re
 };
 
@@ -19,8 +19,8 @@ export const RANK_NAMES: Record<number, string> = {
   5: 'Cinque',
   6: 'Sei',
   7: 'Sette',
-  8: 'Fante',
-  9: 'Cavallo',
+  8: 'Jack',
+  9: 'Donna',
   10: 'Re',
 };
 
@@ -29,37 +29,80 @@ export const SUIT_NAMES: Record<string, string> = {
   coppe: 'Coppe',
   spade: 'Spade',
   bastoni: 'Bastoni',
+  Quadri: 'Quadri',
+  Cuori: 'Cuori',
+  Picche: 'Picche',
+  Fiori: 'Fiori',
+  quadri: 'Quadri',
+  cuori: 'Cuori',
+  picche: 'Picche',
+  fiori: 'Fiori',
 };
 
-export const CIRULLA_GUIDE = [
+export interface GuideSection {
+  title: string;
+  badge: string;
+  content: string;
+  curiosity?: string;
+}
+
+export const CIRULLA_GUIDE: GuideSection[] = [
   {
-    title: '1. Il Monte Iniziale (15 o 30)',
+    title: 'Origini e Curiosità: Cos\'è la Cirulla?',
+    badge: 'TRADIZIONE',
     content:
-      'All\'inizio della smazzata vengono poste 4 carte scoperte sul tavolo. Se la somma delle carte è 15, il mazziere prende tutto e segna 1 Scopa! Se la somma è 30, il mazziere segna ben 2 Scope!',
+      'La Cirulla è il re indiscusso dei giochi di carte della Liguria e del basso Piemonte. Dinamica, spietata e imprevedibile, è una variante della Scopa dove la fortuna e il colpo d\'occhio ribaltano ogni mano.',
+    curiosity:
+      'In genovese è chiamata "ciammachinze" ("chiama quindici") o "ciapachinze" ("prendi quindici"). Il termine "Cirulla" (o "Cirolla") deriverebbe dallo spagnolo "chirola", moneta antica di poco valore usata in America Latina come posta in gioco.',
   },
   {
-    title: '2. Le Accuse alla Distribuzione',
+    title: 'Il Mazzo e i Valori delle Carte',
+    badge: 'LE CARTE',
     content:
-      'Ogni volta che vengono distribuite 3 carte in mano, si controllano le combinazioni speciali:\n• "Buona da tre": se la somma dei valori è ≤ 9, guadagni 3 punti!\n• "Buona da dieci": se hai 3 carte dello stesso valore, guadagni 10 punti!\n• Il 7 di Spade è la "Matta": può assumere qualunque valore da 1 a 10 per comporre l\'accusa più vantaggiosa.',
+      'Si gioca con un mazzo da 40 carte genovesi o italiane tradizionali divise in 4 semi (Quadri, Cuori, Picche, Fiori).\n\n• Asso = vale 1\n• 2, 3, 4, 5, 6, 7 = valore facciale\n• Jack (Fante) = vale 8\n• Donna (Cavallo) = vale 9\n• Re = vale 10',
+    curiosity:
+      'Non hai le genovesi? Si può usare un mazzo francese da 52 togliendo 8, 9, 10 e Jolly. Le figure mantengono il valore: Jack = 8, Donna = 9, Re = 10!',
   },
   {
-    title: '3. Le Prese: Regola del 15',
+    title: 'Il Monte Iniziale (15, 30 o Due Assi)',
+    badge: 'IL MONTE',
     content:
-      'Se il valore della carta giocata sommato a una o più carte a terra fa esattamente 15, prendi tutte quelle carte!\nEsempio: giochi un 7 e a terra c\'è un 8 (7+8=15), oppure giochi un 5 e a terra ci sono 3 e 7 (5+3+7=15).',
+      'All\'inizio della smazzata, il mazziere pone 4 carte scoperte sul tavolo:\n\n• Somma pari a 15: il mazziere prende tutte e 4 le carte e segna 1 Scopa (+1 pt).\n• Somma pari a 30: il mazziere raccoglie tutto e segna 2 Scope (+2 pt).\n• Due Assi a terra: la smazzata "va a monte" e si deve rimescolare il mazzo.\n• Quattro carte uguali: evento leggendario! Il mazziere si aggiudica istantaneamente la partita.',
   },
   {
-    title: '4. Presa Diretta e Asso Pigliatutto',
+    title: 'Le Bussate di Mano (Accuse)',
+    badge: 'LE BUSSATE',
     content:
-      '• Puoi sempre prendere una carta di valore uguale a quella giocata (es. Fante prende Fante).\n• Se giochi un Asso e non ci sono Assi a terra, prendi TUTTE le carte sul tavolo e fai Scopa!\n• Se a terra c\'è già un Asso, il tuo Asso prende solo l\'Asso a terra.',
+      'All\'inizio di ogni mano da 3 carte, prima di giocare, controlla bene cosa hai ricevuto:\n\n• Somma ≤ 9 ("Bussata da tre"): bussa sul tavolo! Guadagni subito 3 Scope (3 punti) e giochi la mano a carte scoperte.\n• Tre carte uguali ("Bussata da dieci"): bussa forte sul tavolo! Guadagni subito 10 Scope (10 punti) e giochi a carte scoperte tra i complimenti (e i mugugni) degli avversari.',
+    curiosity:
+      'La Matta: Il 7 di Cuori è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per consentire una bussata da tre o da dieci!',
   },
   {
-    title: '5. La Scopa',
+    title: 'Le Prese: Regola del 15, Uguale e Somma',
+    badge: 'PRESE',
     content:
-      'Ogni volta che con una presa lasci il tavolo completamente vuoto, fai Scopa (+1 punto), tranne con l\'ultima carta dell\'intera smazzata.',
+      'Ad ogni turno cali una carta per raccogliere dal tavolo:\n\n1. Regola del 15 (Ciapachinze): prendi le carte a terra che, sommate alla tua carta in mano, fanno 15 (es. con un 6 in mano prendi 6 e 3 a terra, perché 6+6+3=15; con un 7 prendi un Jack da 8 perché 7+8=15).\n2. Presa d\'uguale: prendi una carta dello stesso valore (es. Donna 9 prende Donna 9, Jack 8 prende Jack 8).\n3. Presa a somma: prendi carte a terra la cui somma equivale al valore della tua carta (es. Donna da 9 prende un 4 e un 5; un 6 prende 2 e 4).\n\nSe più combinazioni sono possibili, sei sempre TU a scegliere cosa prendere!',
   },
   {
-    title: '6. Punteggio Finale di Smazzata',
+    title: 'L\'Asso Pigliatutto',
+    badge: 'L\'ASSO',
     content:
-      'Al termine del mazzo da 40 carte si assegnano i punti di mazzo:\n• Carte: chi ha più di 20 carte (1 pt)\n• Denari: chi ha più di 5 denari (1 pt)\n• Settebello: chi ha il 7 di Denari (1 pt)\n• Primiera: miglior punteggio di primiera (1 pt)\n• Piccola: Asso, 2 e 3 di Denari (3 pt), +1 pt per ogni carta consecutiva fino al 7 (fino a 7 pt!)\n• Grande: Fante, Cavallo e Re di Denari (5 pt!).\n\nVince chi per primo raggiunge il punteggio obiettivo (51 o 31 punti)!',
+      'Se giochi un Asso e non ci sono altri Assi sul tavolo, "l\'Asso piglia tutto"! Prendi tutte le carte a terra e realizzi una Scopa (+1 punto).\n\nAttenzione: se sul tavolo c\'è già un Asso, sei obbligato a prendere solo l\'Asso a terra.',
+    curiosity:
+      'Se fai scopa con l\'ultima carta giocata dell\'intera smazzata da 40 carte, per regola tradizionale non viene conteggiato il punto di scopa.',
+  },
+  {
+    title: 'Calcolo dei Punti di Mazzo e Cappotto',
+    badge: 'PUNTEGGI',
+    content:
+      'A fine smazzata si conteggiano:\n\n• Carte: chi ha più di 20 carte guadagna 1 punto.\n• Quadri: chi ha più di 5 Quadri guadagna 1 punto.\n• Settebello: il 7 di Quadri vale 1 punto.\n• Primiera: il miglior punteggio (chi ha i 7, i 6, gli Assi) vale 1 punto.\n• Scope: 1 punto per ogni scopa effettuata.\n• Piccola: Asso, 2 e 3 di Quadri = 3 punti. Se hai anche 4, 5, 6, 7 consecutivi vale fino a 7 punti!\n• Grande: Jack (8), Donna (9) e Re (10) di Quadri = 5 punti. Se manca una carta è "rotta" (0 pt).\n\n🔥 CAPPOTTO DI Quadri: Se un giocatore prende tutti i 10 Quadri, fa cappotto e vince immediatamente la partita!',
+    curiosity:
+      'I Quadri ("palanche") sono il seme più prestigioso della Cirulla: chi controlla i Quadri controlla il destino della partita.',
+  },
+  {
+    title: 'Vittoria della Partita',
+    badge: 'VITTORIA',
+    content:
+      'Vince chi per primo raggiunge o supera i 51 punti (partita classica) oppure i 31 punti (partita rapida). In caso di parità al traguardo, si gioca una smazzata di spareggio.',
   },
 ];

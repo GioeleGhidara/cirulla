@@ -531,9 +531,16 @@ export function useCirullaGame() {
   const proceedToNextDealOrEnd = useCallback(() => {
     setIsDealSummaryVisible(false);
 
-    if (playerTotalScore >= settings.targetScore || aiTotalScore >= settings.targetScore) {
+    const isCappotto = dealSummary?.isCappottoPlayer || dealSummary?.isCappottoAI;
+    const reachedTarget = playerTotalScore >= settings.targetScore || aiTotalScore >= settings.targetScore;
+
+    if (reachedTarget || isCappotto) {
       setIsGameOverVisible(true);
-      const playerWon = playerTotalScore >= settings.targetScore && playerTotalScore > aiTotalScore;
+      const playerWon = dealSummary?.isCappottoPlayer
+        ? true
+        : dealSummary?.isCappottoAI
+        ? false
+        : playerTotalScore >= settings.targetScore && playerTotalScore > aiTotalScore;
 
       if (playerWon) {
         playSound('victory', settings.soundEnabled, settings.hapticsEnabled);

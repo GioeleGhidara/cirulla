@@ -21,7 +21,11 @@ export const DealSummaryModal: React.FC<DealSummaryModalProps> = ({
 }) => {
   if (!visible || !scores) return null;
 
-  const isMatchOver = playerTotal >= targetScore || aiTotal >= targetScore;
+  const isMatchOver =
+    playerTotal >= targetScore ||
+    aiTotal >= targetScore ||
+    Boolean(scores.isCappottoPlayer) ||
+    Boolean(scores.isCappottoAI);
 
   const renderRow = (
     label: string,
@@ -108,7 +112,7 @@ export const DealSummaryModal: React.FC<DealSummaryModalProps> = ({
             {/* Piccola */}
             {(scores.piccolaPlayerPoints > 0 || scores.piccolaAIPoints > 0) &&
               renderRow(
-                'Piccola Denari',
+                'Piccola Quadri',
                 scores.piccolaPlayerPoints > 0 ? `+${scores.piccolaPlayerPoints} pt` : '-',
                 scores.piccolaAIPoints > 0 ? `+${scores.piccolaAIPoints} pt` : '-',
                 scores.piccolaPlayerPoints > scores.piccolaAIPoints ? 'player' : 'ai'
@@ -117,7 +121,7 @@ export const DealSummaryModal: React.FC<DealSummaryModalProps> = ({
             {/* Grande */}
             {(scores.grandePlayerPoints > 0 || scores.grandeAIPoints > 0) &&
               renderRow(
-                'Grande Denari',
+                'Grande Quadri',
                 scores.grandePlayerPoints > 0 ? '+5 pt' : '-',
                 scores.grandeAIPoints > 0 ? '+5 pt' : '-',
                 scores.grandePlayerPoints > scores.grandeAIPoints ? 'player' : 'ai'

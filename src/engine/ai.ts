@@ -1,5 +1,5 @@
 import { Card, CaptureMove, AIDifficulty } from '../types/card';
-import { getCaptureMoves, isDenari, isSettebello, isAce } from './rules';
+import { getCaptureMoves, isQuadri, isSettebello, isAce } from './rules';
 
 export interface AIDecision {
   readonly cardToPlay: Card;
@@ -31,16 +31,16 @@ function evaluateCaptureMove(move: CaptureMove): number {
     score += AI_WEIGHTS.SETTEBELLO;
   }
 
-  const denariCount = allCapturedCards.filter(isDenari).length;
-  score += denariCount * AI_WEIGHTS.DENARO_CARD;
+  const QuadriCount = allCapturedCards.filter(isQuadri).length;
+  score += QuadriCount * AI_WEIGHTS.DENARO_CARD;
 
   const piccolaPieces = allCapturedCards.filter(
-    (c) => isDenari(c) && (c.rank === 1 || c.rank === 2 || c.rank === 3)
+    (c) => isQuadri(c) && (c.rank === 1 || c.rank === 2 || c.rank === 3)
   ).length;
   score += piccolaPieces * AI_WEIGHTS.PICCOLA_PIECE;
 
   const grandePieces = allCapturedCards.filter(
-    (c) => isDenari(c) && (c.rank === 8 || c.rank === 9 || c.rank === 10)
+    (c) => isQuadri(c) && (c.rank === 8 || c.rank === 9 || c.rank === 10)
   ).length;
   score += grandePieces * AI_WEIGHTS.GRANDE_PIECE;
 
@@ -66,7 +66,7 @@ function evaluateDiscardSafety(
     safetyScore -= 1000;
   }
 
-  if (isDenari(card)) {
+  if (isQuadri(card)) {
     if (card.rank <= 3) safetyScore -= 100;
     else if (card.rank >= 8) safetyScore -= 80;
     else safetyScore -= 50;
@@ -122,7 +122,7 @@ export function chooseAIMove(
             !move.isScopa &&
             move.capturedCards.length === 1 &&
             move.capturedCards[0].value <= 3 &&
-            !isDenari(move.capturedCards[0]);
+            !isQuadri(move.capturedCards[0]);
 
           if (isSmallSweep) {
             score -= 20;

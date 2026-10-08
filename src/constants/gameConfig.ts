@@ -26,7 +26,7 @@ export const GAME_CONFIG = {
   },
   SCORING: {
     CARTE_THRESHOLD: 20,
-    DENARI_THRESHOLD: 5,
+    Quadri_THRESHOLD: 5,
     GRANDE_POINTS: 5,
     PICCOLA_BASE_POINTS: 3,
   },

@@ -3,15 +3,19 @@ import { PRIMIERA_VALUES } from '../constants/rules';
 import { GAME_CONFIG } from '../constants/gameConfig';
 
 export const isMatta = (card: Card): boolean => {
-  return card.suit === 'spade' && card.rank === 7;
+  const s = card.suit.toLowerCase();
+  return (s === 'cuori' || s === 'picche' || s === 'spade') && card.rank === 7;
 };
 
-export const isDenari = (card: Card): boolean => {
-  return card.suit === 'denari';
+export const isQuadri = (card: Card): boolean => {
+  const s = card.suit.toLowerCase();
+  return s === 'quadri' || s === 'denari';
 };
+
+export const isDenari = isQuadri;
 
 export const isSettebello = (card: Card): boolean => {
-  return isDenari(card) && card.rank === 7;
+  return isQuadri(card) && card.rank === 7;
 };
 
 export const isAce = (card: Card): boolean => {
@@ -242,10 +246,10 @@ function getAceCaptureMoves(
 
 export function calculatePrimiera(cards: readonly Card[]): number {
   const bestBySuit: Record<string, number> = {
-    denari: 0,
-    coppe: 0,
-    spade: 0,
-    bastoni: 0,
+    Quadri: 0,
+    Cuori: 0,
+    Picche: 0,
+    Fiori: 0,
   };
 
   for (const card of cards) {
@@ -259,18 +263,18 @@ export function calculatePrimiera(cards: readonly Card[]): number {
 }
 
 export function calculatePiccola(cards: readonly Card[]): number {
-  const denariRanks = new Set(
-    cards.filter(isDenari).map((c) => c.rank)
+  const QuadriRanks = new Set(
+    cards.filter(isQuadri).map((c) => c.rank)
   );
 
   // Piccola requires continuous cards from Ace: 1, 2, and 3
-  if (!denariRanks.has(1) || !denariRanks.has(2) || !denariRanks.has(3)) {
+  if (!QuadriRanks.has(1) || !QuadriRanks.has(2) || !QuadriRanks.has(3)) {
     return 0;
   }
 
   let points = GAME_CONFIG.SCORING.PICCOLA_BASE_POINTS;
   for (let r = 4; r <= 7; r++) {
-    if (denariRanks.has(r)) {
+    if (QuadriRanks.has(r)) {
       points++;
     } else {
       break;
@@ -280,10 +284,10 @@ export function calculatePiccola(cards: readonly Card[]): number {
 }
 
 export function hasGrande(cards: readonly Card[]): boolean {
-  const denariRanks = new Set(
-    cards.filter(isDenari).map((c) => c.rank)
+  const QuadriRanks = new Set(
+    cards.filter(isQuadri).map((c) => c.rank)
   );
-  return denariRanks.has(8) && denariRanks.has(9) && denariRanks.has(10);
+  return QuadriRanks.has(8) && QuadriRanks.has(9) && QuadriRanks.has(10);
 }
 
 function resolvePointWinner(playerCount: number, aiCount: number): ScoringWinner {
@@ -304,9 +308,9 @@ export function evaluateDeal(
   const carteAI = aiCards.length;
   const cartePoint = resolvePointWinner(cartePlayer, carteAI);
 
-  const denariPlayer = playerCards.filter(isDenari).length;
-  const denariAI = aiCards.filter(isDenari).length;
-  const denariPoint = resolvePointWinner(denariPlayer, denariAI);
+  const QuadriPlayer = playerCards.filter(isQuadri).length;
+  const QuadriAI = aiCards.filter(isQuadri).length;
+  const QuadriPoint = resolvePointWinner(QuadriPlayer, QuadriAI);
 
   const playerHasSettebello = playerCards.some(isSettebello);
   const aiHasSettebello = aiCards.some(isSettebello);
@@ -326,14 +330,14 @@ export function evaluateDeal(
 
   let totalDealPlayer = playerScope + playerAccusePts;
   if (cartePoint === 'player') totalDealPlayer += 1;
-  if (denariPoint === 'player') totalDealPlayer += 1;
+  if (QuadriPoint === 'player') totalDealPlayer += 1;
   if (settebelloPoint === 'player') totalDealPlayer += 1;
   if (primieraPoint === 'player') totalDealPlayer += 1;
   totalDealPlayer += piccolaPlayerPoints + grandePlayerPoints;
 
   let totalDealAI = aiScope + aiAccusePts;
   if (cartePoint === 'ai') totalDealAI += 1;
-  if (denariPoint === 'ai') totalDealAI += 1;
+  if (QuadriPoint === 'ai') totalDealAI += 1;
   if (settebelloPoint === 'ai') totalDealAI += 1;
   if (primieraPoint === 'ai') totalDealAI += 1;
   totalDealAI += piccolaAIPoints + grandeAIPoints;
@@ -342,9 +346,12 @@ export function evaluateDeal(
     cartePlayer,
     carteAI,
     cartePoint,
-    denariPlayer,
-    denariAI,
-    denariPoint,
+    denariPlayer: QuadriPlayer,
+    denariAI: QuadriAI,
+    denariPoint: QuadriPoint,
+    QuadriPlayer,
+    QuadriAI,
+    QuadriPoint,
     settebelloPoint,
     primieraPlayer,
     primieraAI,
@@ -359,5 +366,7 @@ export function evaluateDeal(
     accuseAIPoints: aiAccusePts,
     totalDealPlayer,
     totalDealAI,
+    isCappottoPlayer: QuadriPlayer === 10,
+    isCappottoAI: QuadriAI === 10,
   };
 }
