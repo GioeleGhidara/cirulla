@@ -1,45 +1,94 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Learn more: https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# Dependencies
 node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Expo
+# Expo & Metro
 .expo/
 dist/
 web-build/
 expo-env.d.ts
+.metro-health-check*
 
-# Native
-.kotlin/
+# Native Builds (Continuous Native Generation - CNG)
+/ios/
+/android/
 *.orig.*
+.kotlin/
+*.apk
+*.aab
+*.ipa
+*.app
+*.dSYM/
+*.dSYM.zip
+
+# EAS & Security Credentials
+.eas/
+*-credentials.json
 *.jks
+*.keystore
 *.p8
 *.p12
 *.key
+*.pem
 *.mobileprovision
 
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
 .env*.local
 
-# typescript
+# TypeScript & Cache
 *.tsbuildinfo
+.tscache/
 
-# generated native folders
-/ios
-/android
+# Testing & Coverage
+coverage/
+.nyc_output/
+*.lcov
 
-# temp directory
+# Temporary, Caches & Scratchpads
 temp/
+tmp/
+scratch/
+*.tmp
+*.log
 
+# Operating System Files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon\r\r
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+
+# IDEs & AI Assistants
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.cursor/
+.gemini/
