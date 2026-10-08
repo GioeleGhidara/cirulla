@@ -1,0 +1,33 @@
+export const GAME_CONFIG = {
+  DEAL: {
+    TOTAL_CARDS: 40,
+    INITIAL_TABLE_CARDS: 4,
+    HAND_SIZE: 3,
+    TOTAL_HANDS_PER_DEAL: 6,
+  },
+  TARGETS: {
+    CLASSIC: 51 as const,
+    FAST: 31 as const,
+  },
+  TIMINGS: {
+    AI_TURN_DELAY_MS: 900,
+    BANNER_DURATION_MS: 2400,
+    DEAL_TRANSITION_DELAY_MS: 800,
+    DEAL_FINALIZE_DELAY_MS: 1200,
+  },
+  MONTE: {
+    SINGLE_SCOPA_SUM: 15,
+    DOUBLE_SCOPA_SUM: 30,
+  },
+  ACCUSA: {
+    TRE_MAX_SUM: 9,
+    TRE_POINTS: 3,
+    DIECI_POINTS: 10,
+  },
+  SCORING: {
+    CARTE_THRESHOLD: 20,
+    DENARI_THRESHOLD: 5,
+    GRANDE_POINTS: 5,
+    PICCOLA_BASE_POINTS: 3,
+  },
+} as const;

@@ -1,98 +1,88 @@
 import { Card, CaptureMove, AIDifficulty } from '../types/card';
-import { getCaptureMoves } from './rules';
+import { getCaptureMoves, isDenari, isSettebello, isAce } from './rules';
 
 export interface AIDecision {
-  cardToPlay: Card;
-  captureMove?: CaptureMove;
+  readonly cardToPlay: Card;
+  readonly captureMove?: CaptureMove;
 }
 
-/**
- * Rates the strategic value of a capture move.
- */
-function evaluateMove(move: CaptureMove): number {
+const AI_WEIGHTS = {
+  SCOPA: 100,
+  SETTEBELLO: 50,
+  DENARO_CARD: 12,
+  PICCOLA_PIECE: 15,
+  GRANDE_PIECE: 12,
+  CARD_COUNT: 4,
+  PRIMIERA_SEVEN: 8,
+  PRIMIERA_SIX: 6,
+  PRIMIERA_ACE: 5,
+} as const;
+
+function evaluateCaptureMove(move: CaptureMove): number {
   let score = 0;
 
-  // 1. Scopa is paramount (+100)
   if (move.isScopa) {
-    score += 100;
+    score += AI_WEIGHTS.SCOPA;
   }
 
-  // 2. Settebello (7 di Denari)
-  const allCards = [move.cardPlayed, ...move.capturedCards];
-  const hasSettebello = allCards.some(
-    (c) => c.suit === 'denari' && c.rank === 7
-  );
-  if (hasSettebello) {
-    score += 50;
+  const allCapturedCards = [move.cardPlayed, ...move.capturedCards];
+
+  if (allCapturedCards.some(isSettebello)) {
+    score += AI_WEIGHTS.SETTEBELLO;
   }
 
-  // 3. Denari cards
-  const denariCount = allCards.filter((c) => c.suit === 'denari').length;
-  score += denariCount * 12;
+  const denariCount = allCapturedCards.filter(isDenari).length;
+  score += denariCount * AI_WEIGHTS.DENARO_CARD;
 
-  // 4. Piccola pieces (1, 2, 3 di Denari)
-  const piccolaPieces = allCards.filter(
-    (c) => c.suit === 'denari' && (c.rank === 1 || c.rank === 2 || c.rank === 3)
+  const piccolaPieces = allCapturedCards.filter(
+    (c) => isDenari(c) && (c.rank === 1 || c.rank === 2 || c.rank === 3)
   ).length;
-  score += piccolaPieces * 15;
+  score += piccolaPieces * AI_WEIGHTS.PICCOLA_PIECE;
 
-  // 5. Grande pieces (8, 9, 10 di Denari)
-  const grandePieces = allCards.filter(
-    (c) => c.suit === 'denari' && (c.rank === 8 || c.rank === 9 || c.rank === 10)
+  const grandePieces = allCapturedCards.filter(
+    (c) => isDenari(c) && (c.rank === 8 || c.rank === 9 || c.rank === 10)
   ).length;
-  score += grandePieces * 12;
+  score += grandePieces * AI_WEIGHTS.GRANDE_PIECE;
 
-  // 6. Total cards captured (quantity helps win 'Carte')
-  score += move.capturedCards.length * 4;
+  score += move.capturedCards.length * AI_WEIGHTS.CARD_COUNT;
 
-  // 7. Primiera value (7s, 6s, Aces)
-  for (const c of move.capturedCards) {
-    if (c.rank === 7) score += 8;
-    else if (c.rank === 6) score += 6;
-    else if (c.rank === 1) score += 5;
+  for (const card of move.capturedCards) {
+    if (card.rank === 7) score += AI_WEIGHTS.PRIMIERA_SEVEN;
+    else if (card.rank === 6) score += AI_WEIGHTS.PRIMIERA_SIX;
+    else if (card.rank === 1) score += AI_WEIGHTS.PRIMIERA_ACE;
   }
 
   return score;
 }
 
-/**
- * Assesses the danger of leaving a specific card on the table when no capture is made.
- * A card is dangerous if it easily allows the opponent to make 15 or gives away Denari/Settebello.
- */
 function evaluateDiscardSafety(
   card: Card,
-  tableCards: Card[],
+  tableCards: readonly Card[],
   difficulty: AIDifficulty
 ): number {
   let safetyScore = 50;
 
-  // Never willingly discard Settebello
-  if (card.suit === 'denari' && card.rank === 7) {
+  if (isSettebello(card)) {
     safetyScore -= 1000;
   }
 
-  // Avoid discarding Denari cards, especially Piccola (1, 2, 3) and Grande (8, 9, 10)
-  if (card.suit === 'denari') {
+  if (isDenari(card)) {
     if (card.rank <= 3) safetyScore -= 100;
     else if (card.rank >= 8) safetyScore -= 80;
     else safetyScore -= 50;
   }
 
-  // Avoid discarding high primiera (7, 6, 1)
   if (card.rank === 7) safetyScore -= 60;
   if (card.rank === 6) safetyScore -= 40;
-  if (card.rank === 1) safetyScore -= 70; // Ace is pigliatutto, save it!
+  if (isAce(card)) safetyScore -= 70;
 
   if (difficulty === 'facile') {
-    // In easy mode, add random variance
     return safetyScore + (Math.random() * 40 - 20);
   }
 
-  // Check if adding this card creates simple 15 combinations with existing table cards
-  for (const tc of tableCards) {
-    const combined = tc.value + card.value;
-    // If combined is <= 14, an opponent card (15 - combined) can take both for a 15
-    if (combined < 15 && combined >= 5) {
+  for (const tableCard of tableCards) {
+    const combinedSum = tableCard.value + card.value;
+    if (combinedSum < 15 && combinedSum >= 5) {
       safetyScore -= 15;
     }
   }
@@ -100,12 +90,9 @@ function evaluateDiscardSafety(
   return safetyScore;
 }
 
-/**
- * Selects the optimal card and move for the AI.
- */
 export function chooseAIMove(
-  aiHand: Card[],
-  tableCards: Card[],
+  aiHand: readonly Card[],
+  tableCards: readonly Card[],
   isLastPlayOfDeck: boolean,
   difficulty: AIDifficulty
 ): AIDecision {
@@ -113,75 +100,61 @@ export function chooseAIMove(
     throw new Error('AI hand is empty');
   }
 
-  // Find all possible moves for each card in hand
-  const possibleMovesByCard: {
-    card: Card;
-    moves: CaptureMove[];
-  }[] = [];
+  const movesByCard = aiHand.map((card) => ({
+    card,
+    moves: getCaptureMoves(card, tableCards, isLastPlayOfDeck),
+  }));
 
-  for (const card of aiHand) {
-    const moves = getCaptureMoves(card, tableCards, isLastPlayOfDeck);
-    possibleMovesByCard.push({ card, moves });
-  }
+  const cardsWithCaptures = movesByCard.filter((entry) => entry.moves.length > 0);
 
-  // Check if any card has capture moves
-  const cardsWithMoves = possibleMovesByCard.filter((p) => p.moves.length > 0);
+  if (cardsWithCaptures.length > 0) {
+    const scoredMoves: { card: Card; move: CaptureMove; score: number }[] = [];
 
-  if (cardsWithMoves.length > 0) {
-    // Evaluate all capture moves across all playable cards
-    const evaluatedMoves: {
-      card: Card;
-      move: CaptureMove;
-      score: number;
-    }[] = [];
-
-    for (const { card, moves } of cardsWithMoves) {
+    for (const { card, moves } of cardsWithCaptures) {
       for (const move of moves) {
-        let score = evaluateMove(move);
+        let score = evaluateCaptureMove(move);
 
         if (difficulty === 'facile') {
-          score += (Math.random() * 30 - 15);
+          score += Math.random() * 30 - 15;
         } else if (difficulty === 'campione') {
-          // Campione bonus: prioritize preserving Ace if move takes only 1 tiny non-denari card
-          if (
+          const isSmallSweep =
             move.isAceSweep &&
             !move.isScopa &&
             move.capturedCards.length === 1 &&
             move.capturedCards[0].value <= 3 &&
-            move.capturedCards[0].suit !== 'denari'
-          ) {
-            score -= 20; // Save ace for a bigger sweep
+            !isDenari(move.capturedCards[0]);
+
+          if (isSmallSweep) {
+            score -= 20;
           }
         }
 
-        evaluatedMoves.push({ card, move, score });
+        scoredMoves.push({ card, move, score });
       }
     }
 
-    // Sort by best score descending
-    evaluatedMoves.sort((a, b) => b.score - a.score);
-    const best = evaluatedMoves[0];
+    scoredMoves.sort((a, b) => b.score - a.score);
+    const optimal = scoredMoves[0];
 
     return {
-      cardToPlay: best.card,
-      captureMove: best.move,
+      cardToPlay: optimal.card,
+      captureMove: optimal.move,
     };
   }
 
-  // No capture moves possible: AI must discard a card to the table
-  let bestCard = aiHand[0];
-  let bestSafety = -Infinity;
+  let bestDiscardCard = aiHand[0];
+  let highestSafety = -Infinity;
 
   for (const card of aiHand) {
     const safety = evaluateDiscardSafety(card, tableCards, difficulty);
-    if (safety > bestSafety) {
-      bestSafety = safety;
-      bestCard = card;
+    if (safety > highestSafety) {
+      highestSafety = safety;
+      bestDiscardCard = card;
     }
   }
 
   return {
-    cardToPlay: bestCard,
+    cardToPlay: bestDiscardCard,
     captureMove: undefined,
   };
 }

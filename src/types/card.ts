@@ -4,81 +4,85 @@ export type DeckStyle = 'genovesi' | 'piacentine' | 'napoletane';
 
 export type AIDifficulty = 'facile' | 'normale' | 'campione';
 
+export type PlayerSide = 'player' | 'ai';
+
+export type ScoringWinner = PlayerSide | 'tie';
+
 export interface Card {
-  id: string;             // unique identifier e.g. 'denari-7'
-  suit: Suit;
-  rank: number;           // 1 to 10
-  value: number;          // 1 (Asso) to 10 (Re)
-  name: string;           // e.g. 'Sette di Denari'
+  readonly id: string;
+  readonly suit: Suit;
+  readonly rank: number;
+  readonly value: number;
+  readonly name: string;
 }
 
 export interface CaptureMove {
-  cardPlayed: Card;
-  capturedCards: Card[];
-  isAceSweep: boolean;
-  is15Sum: boolean;
-  isDirectMatch: boolean;
-  isScopa: boolean;
+  readonly cardPlayed: Card;
+  readonly capturedCards: readonly Card[];
+  readonly isAceSweep: boolean;
+  readonly is15Sum: boolean;
+  readonly isDirectMatch: boolean;
+  readonly isScopa: boolean;
 }
 
 export type AccusaType = 'nessuna' | 'tre' | 'dieci';
 
 export interface AccusaInfo {
-  type: AccusaType;
-  points: number;
-  description: string;
-  cards: Card[];
-  usedMatta?: boolean;
+  readonly type: AccusaType;
+  readonly points: number;
+  readonly description: string;
+  readonly cards: readonly Card[];
+  readonly usedMatta?: boolean;
 }
 
 export interface DealScores {
-  cartePlayer: number;
-  carteAI: number;
-  cartePoint: 'player' | 'ai' | 'tie';
+  readonly cartePlayer: number;
+  readonly carteAI: number;
+  readonly cartePoint: ScoringWinner;
 
-  denariPlayer: number;
-  denariAI: number;
-  denariPoint: 'player' | 'ai' | 'tie';
+  readonly denariPlayer: number;
+  readonly denariAI: number;
+  readonly denariPoint: ScoringWinner;
 
-  settebelloPoint: 'player' | 'ai' | 'none';
+  readonly settebelloPoint: PlayerSide | 'none';
 
-  primieraPlayer: number;
-  primieraAI: number;
-  primieraPoint: 'player' | 'ai' | 'tie';
+  readonly primieraPlayer: number;
+  readonly primieraAI: number;
+  readonly primieraPoint: ScoringWinner;
 
-  piccolaPlayerPoints: number;
-  piccolaAIPoints: number;
+  readonly piccolaPlayerPoints: number;
+  readonly piccolaAIPoints: number;
 
-  grandePlayerPoints: number;
-  grandeAIPoints: number;
+  readonly grandePlayerPoints: number;
+  readonly grandeAIPoints: number;
 
-  scopePlayer: number;
-  scopeAI: number;
+  readonly scopePlayer: number;
+  readonly scopeAI: number;
 
-  accusePlayerPoints: number;
-  accuseAIPoints: number;
+  readonly accusePlayerPoints: number;
+  readonly accuseAIPoints: number;
 
-  totalDealPlayer: number;
-  totalDealAI: number;
+  readonly totalDealPlayer: number;
+  readonly totalDealAI: number;
 }
 
 export interface GameStats {
-  gamesPlayed: number;
-  gamesWon: number;
-  gamesLost: number;
-  totalScope: number;
-  bestScoreInGame: number;
-  piccoleMade: number;
-  grandiMade: number;
-  accuseTreMade: number;
-  accuseDieciMade: number;
+  readonly gamesPlayed: number;
+  readonly gamesWon: number;
+  readonly gamesLost: number;
+  readonly totalScope: number;
+  readonly bestScoreInGame: number;
+  readonly piccoleMade: number;
+  readonly grandiMade: number;
+  readonly accuseTreMade: number;
+  readonly accuseDieciMade: number;
 }
 
 export interface GameSettings {
-  deckStyle: DeckStyle;
-  aiDifficulty: AIDifficulty;
-  targetScore: 31 | 51;
-  soundEnabled: boolean;
-  hapticsEnabled: boolean;
-  autoSelectBestCapture: boolean;
+  readonly deckStyle: DeckStyle;
+  readonly aiDifficulty: AIDifficulty;
+  readonly targetScore: 31 | 51;
+  readonly soundEnabled: boolean;
+  readonly hapticsEnabled: boolean;
+  readonly autoSelectBestCapture: boolean;
 }

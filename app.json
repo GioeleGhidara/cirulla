@@ -7,11 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": "cirulla",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0f172a"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gioele.cirulla",
