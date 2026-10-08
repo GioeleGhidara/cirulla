@@ -10,10 +10,12 @@ Sviluppata con **React Native + Expo**, TypeScript, grafica vettoriale nitida ad
 
 - **Regole Autentiche di Cirulla**:
   - **Valori delle Figure**: Fante (Jack) = 8, Donna (Cavallo) = 9, Re = 10.
-  - **Il Monte**: Controllo iniziale delle 4 carte a terra (se la somma è 15 assegna 1 Scopa al mazziere, se è 30 assegna 2 Scope).
+  - **Scope in tavola**: Controllo iniziale delle 4 carte a terra: se la somma è 15 assegna 1 Scopa al mazziere, se è 30 assegna 2 Scope.
+  - **L'ultima mano**: Chi realizza la presa dell'ultima mano, raccoglie tutte le carte rimaste a terra.
+  - **A monte**: Controllo iniziale delle 4 carte a terra: se sono presenti 2 assi, la smazzata ricomincia e si ridanno le carte.
   - **Bussate di Mano (Accuse)**: Valutazione automatica all'inizio di ogni mano da 3 carte:
-    - *Cirulla (Bussata da 3 punti)* (somma $\le 9$): +3 punti immediati con carte scoperte.
-    - *Decino (Bussata da 10 punti)* (tris di carte uguali): +10 punti immediati con carte scoperte.
+    - *Cirulla (Bussata da 3 punti)* (somma $\le 9$): +3 scope.
+    - *Decino (Bussata da 10 punti)* (tris di carte uguali): +10 scope.
     - *La Matta (7 di Cuori)*: assume il valore più favorevole da 1 a 10 per completare o migliorare la Cirulla o il Decino.
   - **Prese del 15**: Calcolo di tutte le combinazioni a somma 15 con la carta giocata.
   - **Presa d'Uguale**: Possibilità di prendere carte dello stesso valore.
