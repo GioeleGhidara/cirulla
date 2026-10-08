@@ -109,8 +109,8 @@ export const GameTable: React.FC<GameTableProps> = ({
   const cardHeight = isTablet ? 122 : 98;
   const smallCardWidth = isTablet ? 54 : 42;
   const smallCardHeight = isTablet ? 78 : 60;
-  const opponentCardWidth = isTablet ? 60 : 48;
-  const opponentCardHeight = isTablet ? 86 : 68;
+  const opponentCardWidth = isTablet ? 66 : 54;
+  const opponentCardHeight = isTablet ? 94 : 76;
 
   const hasSelectedTableCards = selectedTableCardIds.length > 0;
   const targetIdsSet = new Set(aiTargetCardIds);
@@ -166,8 +166,8 @@ export const GameTable: React.FC<GameTableProps> = ({
         {/* Centro: Mano dell'Avversario vista dal dorso (diminuisce quando gioca) */}
         <View style={styles.aiHandCenter}>
           {aiHand.map((card, idx) => {
-            const rotDeg = (idx - (aiHand.length - 1) / 2) * 5;
-            const offsetY = Math.abs(idx - (aiHand.length - 1) / 2) * 2;
+            const rotDeg = (idx - (aiHand.length - 1) / 2) * 2;
+            const offsetY = Math.abs(idx - (aiHand.length - 1) / 2) * 1;
 
             return (
               <View
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   aiCardWrapper: {
-    marginHorizontal: -6,
+    marginHorizontal: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.35,
