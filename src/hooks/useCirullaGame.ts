@@ -26,7 +26,7 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_STATS,
 } from '../services/storage';
-import { playSound } from '../services/audio';
+import { playSound, triggerHaptic } from '../services/audio';
 import { GAME_CONFIG } from '../constants/gameConfig';
 
 export interface BannerState<T> {
@@ -58,8 +58,13 @@ export function useCirullaGame() {
 
   const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(true);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [selectedTableCardIds, setSelectedTableCardIds] = useState<string[]>([]);
+  const [lastPlayedCardByAI, setLastPlayedCardByAI] = useState<Card | null>(null);
+  const [aiTargetCardIds, setAiTargetCardIds] = useState<string[]>([]);
+  const [isShufflingOrDealing, setIsShufflingOrDealing] = useState<boolean>(false);
+  const [dealingMessage, setDealingMessage] = useState<string | null>(null);
   const [lastActionMessage, setLastActionMessage] = useState<string>(
-    'Benvenuto a Cirulla! Seleziona una carta per iniziare.'
+    'Benvenuto a Cirulla! Seleziona una carta in mano e poi clicca sulle carte a terra per prenderle.'
   );
 
   const [choiceMoves, setChoiceMoves] = useState<CaptureMove[]>([]);
@@ -203,13 +208,28 @@ export function useCirullaGame() {
     setPlayerAccusePts(0);
     setAiAccusePts(0);
     setSelectedCard(null);
+    setSelectedTableCardIds([]);
+    setLastPlayedCardByAI(null);
+    setAiTargetCardIds([]);
     setLastCapturingPlayer(null);
+
+    setIsShufflingOrDealing(true);
+    setDealingMessage(
+      currentDealer === 'player'
+        ? 'Mazziere: TU mescoli il mazzo e distribuisci le carte...'
+        : "Mazziere: L'AVVERSARIO mescola il mazzo e distribuisce le carte..."
+    );
+    playSound('card', currentSettings.soundEnabled, currentSettings.hapticsEnabled);
+    setTimeout(() => {
+      setIsShufflingOrDealing(false);
+      setDealingMessage(null);
+    }, 1600);
 
     const playerStarts = currentDealer === 'ai';
     setIsPlayerTurn(playerStarts);
     setLastActionMessage(
       playerStarts
-        ? 'Nuova smazzata: tocca a te giocare!'
+        ? 'Nuova smazzata: tocca a te giocare! Seleziona una carta in mano.'
         : "Nuova smazzata: l'avversario apre il gioco."
     );
 
@@ -362,6 +382,8 @@ export function useCirullaGame() {
   }, [deck, handIndex, dealer, settings, checkAndApplyAccuse, finalizeDeal]);
 
   const executeAITurn = useCallback(() => {
+    if (aiHand.length === 0) return;
+
     const isLastPlay =
       deck.length === 0 &&
       handIndex === GAME_CONFIG.DEAL.TOTAL_HANDS_PER_DEAL &&
@@ -369,38 +391,60 @@ export function useCirullaGame() {
       playerHand.length === 0;
 
     const decision = chooseAIMove(aiHand, tableCards, isLastPlay, settings.aiDifficulty);
-    const remainingAIHand = aiHand.filter((c) => c.id !== decision.cardToPlay.id);
-    setAiHand(remainingAIHand);
+    const cardPlayed = decision.cardToPlay;
+    const remainingAIHand = aiHand.filter((c) => c.id !== cardPlayed.id);
 
+    // STEP 1: Visually reveal which card the AI is playing!
+    setAiHand(remainingAIHand);
+    setLastPlayedCardByAI(cardPlayed);
     playSound('card', settings.soundEnabled, settings.hapticsEnabled);
 
     if (decision.captureMove) {
       const move = decision.captureMove;
-      const capturedIds = new Set(move.capturedCards.map((c) => c.id));
-      const newTable = tableCards.filter((c) => !capturedIds.has(c.id));
+      const targetIds = move.capturedCards.map((c) => c.id);
+      setAiTargetCardIds(targetIds);
 
-      setTableCards(newTable);
-      setAiCaptured((prev) => [...prev, decision.cardToPlay, ...move.capturedCards]);
-      setLastCapturingPlayer('ai');
-
-      let desc = `L'avversario gioca ${decision.cardToPlay.name} e prende ${move.capturedCards.length} carta/e`;
-      if (move.isAceSweep) desc = `L'avversario gioca l'Asso e spazza il tavolo!`;
-
-      if (move.isScopa) {
-        setAiScope((prev) => prev + 1);
-        triggerScopaBanner('ai', 1);
-        desc += ' (SCOPA!)';
-      } else {
-        playSound('capture', settings.soundEnabled, settings.hapticsEnabled);
-      }
-
+      let desc = `L'avversario gioca ${cardPlayed.name} per prendere ${move.capturedCards.length} carta/e...`;
+      if (move.isAceSweep) desc = `L'avversario gioca l'Asso! Prende tutte le carte...`;
       setLastActionMessage(desc);
-    } else {
-      setTableCards((prev) => [...prev, decision.cardToPlay]);
-      setLastActionMessage(`L'avversario cala ${decision.cardToPlay.name} a terra.`);
-    }
 
-    checkHandEnd(playerHand, remainingAIHand);
+      // STEP 2: Give the human player 1.4s to clearly SEE the card and the capture targets
+      setTimeout(() => {
+        const capturedIdsSet = new Set(targetIds);
+        const newTable = tableCards.filter((c) => !capturedIdsSet.has(c.id));
+
+        setTableCards(newTable);
+        setAiCaptured((prev) => [...prev, cardPlayed, ...move.capturedCards]);
+        setLastCapturingPlayer('ai');
+        setAiTargetCardIds([]);
+
+        if (move.isScopa) {
+          setAiScope((prev) => prev + 1);
+          triggerScopaBanner('ai', 1);
+          setLastActionMessage(`L'avversario fa SCOPA con ${cardPlayed.name}!`);
+        } else {
+          playSound('capture', settings.soundEnabled, settings.hapticsEnabled);
+          setLastActionMessage(
+            `L'avversario ha preso ${move.capturedCards.map((c) => c.name).join(' + ')}.`
+          );
+        }
+
+        setTimeout(() => {
+          setLastPlayedCardByAI(null);
+          checkHandEnd(playerHand, remainingAIHand);
+        }, 700);
+      }, 1400);
+    } else {
+      // Discard onto the table
+      setLastActionMessage(`L'avversario cala ${cardPlayed.name} a terra.`);
+      setTimeout(() => {
+        setTableCards((prev) => [...prev, cardPlayed]);
+        setTimeout(() => {
+          setLastPlayedCardByAI(null);
+          checkHandEnd(playerHand, remainingAIHand);
+        }, 500);
+      }, 1000);
+    }
   }, [
     deck.length,
     handIndex,
@@ -487,89 +531,101 @@ export function useCirullaGame() {
 
   const selectPlayerCard = useCallback((card: Card) => {
     if (selectedCard?.id === card.id) {
-      confirmPlayCard();
+      // Deselect card
+      setSelectedCard(null);
+      setSelectedTableCardIds([]);
+      setLastActionMessage('Carta deselezionata.');
     } else {
       setSelectedCard(card);
+      setSelectedTableCardIds([]);
       playSound('card', settings.soundEnabled, settings.hapticsEnabled);
-      const isLastPlay =
-        deck.length === 0 &&
-        handIndex === GAME_CONFIG.DEAL.TOTAL_HANDS_PER_DEAL &&
-        playerHand.length === 1 &&
-        aiHand.length === 0;
-      const moves = getCaptureMoves(card, tableCards, isLastPlay);
-      if (moves.length > 0) {
-        setSelectedMove(moves[0]);
+      setLastActionMessage(`Hai selezionato ${card.name}. Clicca sulle carte a terra per prenderle o cala sul tavolo.`);
+    }
+  }, [selectedCard, settings.soundEnabled, settings.hapticsEnabled]);
+
+  const toggleTableCard = useCallback((tableCard: Card) => {
+    if (!selectedCard || !isPlayerTurn) {
+      setLastActionMessage('Seleziona prima una carta dalla tua mano in basso!');
+      return;
+    }
+    playSound('card', settings.soundEnabled, settings.hapticsEnabled);
+    triggerHaptic('light', settings.hapticsEnabled);
+
+    setSelectedTableCardIds((prev) => {
+      const exists = prev.includes(tableCard.id);
+      const next = exists ? prev.filter((id) => id !== tableCard.id) : [...prev, tableCard.id];
+      if (next.length === 0) {
+        setLastActionMessage(`Deselezionata ${tableCard.name} dal tavolo.`);
       } else {
-        setSelectedMove(null);
+        setLastActionMessage(`Selezionate ${next.length} carta/e a terra per la presa.`);
       }
+      return next;
+    });
+  }, [selectedCard, isPlayerTurn, settings.soundEnabled, settings.hapticsEnabled]);
+
+  const clearTableSelection = useCallback(() => {
+    setSelectedTableCardIds([]);
+    playSound('card', settings.soundEnabled, settings.hapticsEnabled);
+  }, [settings.soundEnabled, settings.hapticsEnabled]);
+
+  const confirmPlayCard = useCallback(() => {
+    if (!selectedCard || !isPlayerTurn) return;
+
+    const isLastPlay =
+      deck.length === 0 &&
+      handIndex === GAME_CONFIG.DEAL.TOTAL_HANDS_PER_DEAL &&
+      playerHand.length === 1 &&
+      aiHand.length === 0;
+
+    const legalMoves = getCaptureMoves(selectedCard, tableCards, isLastPlay);
+
+    // CASE 1: Nessuna carta a terra selezionata -> Scarto o Asso pigliatutto
+    if (selectedTableCardIds.length === 0) {
+      const aceSweepMove = legalMoves.find((m) => m.isAceSweep);
+      if (aceSweepMove) {
+        executePlayerMove(selectedCard, aceSweepMove);
+        setSelectedTableCardIds([]);
+        return;
+      }
+
+      // Scarta la carta a terra
+      executePlayerMove(selectedCard, undefined);
+      setSelectedTableCardIds([]);
+      return;
+    }
+
+    // CASE 2: Carte a terra selezionate manualmente -> convalida con le regole della Cirulla
+    const selectedIdsSet = new Set(selectedTableCardIds);
+    const matchedMove = legalMoves.find(
+      (m) =>
+        m.capturedCards.length === selectedTableCardIds.length &&
+        m.capturedCards.every((c) => selectedIdsSet.has(c.id))
+    );
+
+    if (matchedMove) {
+      // Presa valida realizzata dal giocatore!
+      executePlayerMove(selectedCard, matchedMove);
+      setSelectedTableCardIds([]);
+    } else {
+      // Presa non valida secondo le regole: nessun suggerimento regalato, deve pensare lui!
+      setLastActionMessage(
+        'Combinazione non valida: le carte selezionate a terra non formano una presa (somma a 15, uguale o valore della carta).'
+      );
+      triggerHaptic('warning', settings.hapticsEnabled);
+      playSound('card', settings.soundEnabled, settings.hapticsEnabled);
     }
   }, [
     selectedCard,
-    settings.soundEnabled,
-    settings.hapticsEnabled,
+    isPlayerTurn,
+    selectedTableCardIds,
     deck.length,
     handIndex,
     playerHand.length,
     aiHand.length,
     tableCards,
-  ]);
-
-  const selectCaptureMove = useCallback((move: CaptureMove) => {
-    setSelectedMove(move);
-    playSound('card', settings.soundEnabled, settings.hapticsEnabled);
-  }, [settings.soundEnabled, settings.hapticsEnabled]);
-
-  const toggleTableCard = useCallback((tableCard: Card) => {
-    if (!selectedCard || availableMovesForSelected.length === 0) return;
-
-    // Find moves that contain this table card
-    const movesWithCard = availableMovesForSelected.filter((m) =>
-      m.capturedCards.some((c) => c.id === tableCard.id)
-    );
-
-    if (movesWithCard.length === 0) return;
-
-    // If current selected move doesn't have this card, switch to the first move that does
-    if (!selectedMove || !selectedMove.capturedCards.some((c) => c.id === tableCard.id)) {
-      setSelectedMove(movesWithCard[0]);
-      playSound('card', settings.soundEnabled, settings.hapticsEnabled);
-      return;
-    }
-
-    // If current selected move already has this card, cycle through other candidate moves
-    if (movesWithCard.length > 1) {
-      const currentIndex = movesWithCard.findIndex(
-        (m) => m === selectedMove
-      );
-      const nextIndex = (currentIndex + 1) % movesWithCard.length;
-      setSelectedMove(movesWithCard[nextIndex]);
-      playSound('card', settings.soundEnabled, settings.hapticsEnabled);
-    }
-  }, [selectedCard, availableMovesForSelected, selectedMove, settings.soundEnabled, settings.hapticsEnabled]);
-
-  const confirmPlayCard = useCallback(() => {
-    if (!selectedCard || !isPlayerTurn) return;
-
-    if (availableMovesForSelected.length === 0) {
-      executePlayerMove(selectedCard, undefined);
-    } else if (availableMovesForSelected.length === 1) {
-      executePlayerMove(selectedCard, availableMovesForSelected[0]);
-    } else {
-      // Multiple capture choices exist!
-      // If user has already actively chosen one move via table or chip:
-      if (selectedMove) {
-        executePlayerMove(selectedCard, selectedMove);
-      } else {
-        setChoiceMoves(availableMovesForSelected);
-        setIsChoiceModalVisible(true);
-      }
-    }
-  }, [
-    selectedCard,
-    isPlayerTurn,
-    availableMovesForSelected,
-    selectedMove,
     executePlayerMove,
+    settings.hapticsEnabled,
+    settings.soundEnabled,
   ]);
 
   const proceedToNextDealOrEnd = useCallback(() => {
@@ -656,12 +712,17 @@ export function useCirullaGame() {
     accusaBanner,
     monteBanner,
     selectPlayerCard,
-    selectCaptureMove,
     toggleTableCard,
     openChoiceModal: () => {
       setChoiceMoves(availableMovesForSelected);
       setIsChoiceModalVisible(true);
     },
+    selectedTableCardIds,
+    lastPlayedCardByAI,
+    aiTargetCardIds,
+    isShufflingOrDealing,
+    dealingMessage,
+    clearTableSelection,
     confirmPlayCard,
     executeChosenCapture: (move: CaptureMove) => {
       setIsChoiceModalVisible(false);

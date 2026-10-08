@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, StyleProp, Image, Pressable } from 'react-native';
 import Svg, { Path, Circle, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { Card, CardGraphicStyle, DeckSkinId, DeckStyle, Suit } from '../types/card';
 import { isMatta, isSettebello } from '../engine/rules';
@@ -45,7 +45,7 @@ interface CardViewProps {
   onPress?: () => void;
   width?: number;
   height?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 import { SuitSymbol } from './common/SuitSymbol';
 
@@ -271,11 +271,6 @@ const CardViewBase: React.FC<CardViewProps> = ({
             resizeMode="contain"
             onError={() => setImageLoadError(true)}
           />
-          {isFigure && (
-            <View style={styles.cirullaFigureValPill}>
-              <Text style={styles.cirullaFigureValText}>Val: {card.value}</Text>
-            </View>
-          )}
         </View>
       ) : showClassicPoker && classicImgUrl ? (
         <View style={styles.classicImageContainer}>
@@ -285,11 +280,6 @@ const CardViewBase: React.FC<CardViewProps> = ({
             resizeMode="contain"
             onError={() => setImageLoadError(true)}
           />
-          {isFigure && (
-            <View style={styles.cirullaFigureValPill}>
-              <Text style={styles.cirullaFigureValText}>Val: {card.value}</Text>
-            </View>
-          )}
         </View>
       ) : (
         <>
@@ -441,22 +431,6 @@ const styles = StyleSheet.create({
   classicCardImage: {
     width: '100%',
     height: '100%',
-  },
-  cirullaFigureValPill: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: 'rgba(15, 23, 42, 0.88)',
-    borderRadius: 3,
-    paddingHorizontal: 3,
-    paddingVertical: 1,
-    borderWidth: 0.5,
-    borderColor: '#eab308',
-  },
-  cirullaFigureValText: {
-    color: '#fde047',
-    fontSize: 7.5,
-    fontWeight: '900',
   },
   cornerTopLeft: {
     alignItems: 'center',
