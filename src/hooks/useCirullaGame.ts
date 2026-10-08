@@ -148,7 +148,7 @@ export function useCirullaGame() {
   }, [triggerAccusaBanner]);
 
   const startNewDeal = useCallback((currentDealer: PlayerSide, currentSettings = settings) => {
-    const fullDeck = shuffleDeck(createDeck());
+    const fullDeck = shuffleDeck(createDeck(currentSettings.deckStyle));
     const initialTable = fullDeck.slice(0, GAME_CONFIG.DEAL.INITIAL_TABLE_CARDS);
     let remainingDeck = fullDeck.slice(GAME_CONFIG.DEAL.INITIAL_TABLE_CARDS);
 

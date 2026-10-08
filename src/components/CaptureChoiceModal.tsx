@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { CardView } from './CardView';
-import { CaptureMove } from '../types/card';
+import { CaptureMove, DeckStyle } from '../types/card';
 
 interface CaptureChoiceModalProps {
   visible: boolean;
   moves: CaptureMove[];
+  deckStyle?: DeckStyle;
   onSelectMove: (move: CaptureMove) => void;
   onCancel: () => void;
 }
@@ -13,6 +14,7 @@ interface CaptureChoiceModalProps {
 export const CaptureChoiceModal: React.FC<CaptureChoiceModalProps> = ({
   visible,
   moves,
+  deckStyle,
   onSelectMove,
   onCancel,
 }) => {
@@ -60,6 +62,7 @@ export const CaptureChoiceModal: React.FC<CaptureChoiceModalProps> = ({
                       <CardView
                         key={`choice-card-${c.id}-${cIdx}`}
                         card={c}
+                        deckStyle={deckStyle}
                         width={46}
                         height={66}
                       />

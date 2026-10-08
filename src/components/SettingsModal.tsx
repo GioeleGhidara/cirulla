@@ -60,6 +60,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </TouchableOpacity>
                 ))}
               </View>
+              <Text style={styles.deckHintText}>
+                {settings.deckStyle === 'genovesi'
+                  ? 'Base tradizionale: segni francesi (Cuori ♥, Denari ♦, Picche ♠, Fiori ♣).'
+                  : 'Semi regionali italiani: Coppe 🏆, Denari 🪙, Spade ⚔, Bastoni 🪵.'}
+              </Text>
             </View>
 
             {/* Punteggio Obiettivo */}
@@ -248,6 +253,12 @@ const styles = StyleSheet.create({
   pillTextActive: {
     color: '#ffffff',
     fontWeight: '900',
+  },
+  deckHintText: {
+    color: '#94a3b8',
+    fontSize: 11,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   toggleRow: {
     flexDirection: 'row',

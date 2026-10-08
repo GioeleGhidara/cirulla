@@ -246,16 +246,26 @@ function getAceCaptureMoves(
 
 export function calculatePrimiera(cards: readonly Card[]): number {
   const bestBySuit: Record<string, number> = {
-    Quadri: 0,
-    Cuori: 0,
-    Picche: 0,
-    Fiori: 0,
+    denari: 0,
+    cuori: 0,
+    picche: 0,
+    fiori: 0,
   };
 
   for (const card of cards) {
+    const s = card.suit.toLowerCase();
+    const group =
+      s === 'denari' || s === 'quadri'
+        ? 'denari'
+        : s === 'cuori' || s === 'coppe'
+        ? 'cuori'
+        : s === 'picche' || s === 'spade'
+        ? 'picche'
+        : 'fiori';
+
     const pVal = PRIMIERA_VALUES[card.rank] || 0;
-    if (pVal > bestBySuit[card.suit]) {
-      bestBySuit[card.suit] = pVal;
+    if (pVal > bestBySuit[group]) {
+      bestBySuit[group] = pVal;
     }
   }
 
@@ -349,9 +359,6 @@ export function evaluateDeal(
     denariPlayer: QuadriPlayer,
     denariAI: QuadriAI,
     denariPoint: QuadriPoint,
-    QuadriPlayer,
-    QuadriAI,
-    QuadriPoint,
     settebelloPoint,
     primieraPlayer,
     primieraAI,

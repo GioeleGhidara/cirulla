@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../types/card';
+import { isDenari } from '../engine/rules';
 
 interface ScoreHeaderProps {
   playerScore: number;
@@ -34,8 +35,8 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   onOpenRules,
   onOpenStats,
 }) => {
-  const playerQuadri = playerCaptured.filter((c) => c.suit === 'Quadri').length;
-  const aiQuadri = aiCaptured.filter((c) => c.suit === 'Quadri').length;
+  const playerDenari = playerCaptured.filter(isDenari).length;
+  const aiDenari = aiCaptured.filter(isDenari).length;
 
   return (
     <View style={styles.container}>
@@ -87,7 +88,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
           <Text style={styles.mainScore}>{playerScore}</Text>
           <View style={styles.statsMiniRow}>
             <Text style={styles.statsMiniText}>
-              🎴 {playerCaptured.length}  🟡 {playerQuadri}
+              🎴 {playerCaptured.length}  ♦ {playerDenari}
             </Text>
             {playerScope > 0 && (
               <View style={styles.scopaMiniBadge}>
@@ -116,7 +117,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
           <Text style={styles.mainScore}>{aiScore}</Text>
           <View style={styles.statsMiniRow}>
             <Text style={styles.statsMiniText}>
-              🎴 {aiCaptured.length}  🟡 {aiQuadri}
+              🎴 {aiCaptured.length}  ♦ {aiDenari}
             </Text>
             {aiScope > 0 && (
               <View style={[styles.scopaMiniBadge, styles.scopaAIBadge]}>

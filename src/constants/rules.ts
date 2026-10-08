@@ -59,9 +59,9 @@ export const CIRULLA_GUIDE: GuideSection[] = [
     title: 'Il Mazzo e i Valori delle Carte',
     badge: 'LE CARTE',
     content:
-      'Si gioca con un mazzo da 40 carte genovesi o italiane tradizionali divise in 4 semi (Quadri, Cuori, Picche, Fiori).\n\n• Asso = vale 1\n• 2, 3, 4, 5, 6, 7 = valore facciale\n• Jack (Fante) = vale 8\n• Donna (Cavallo) = vale 9\n• Re = vale 10',
+      'Si gioca con un mazzo da 40 carte genovesi con i semi francesi (Denari ♦, Cuori ♥, Picche ♠, Fiori ♣) o con carte regionali (Denari, Coppe, Spade, Bastoni).\n\n• Asso = vale 1\n• 2, 3, 4, 5, 6, 7 = valore facciale\n• Jack (Fante) = vale 8\n• Donna (Cavallo) = vale 9\n• Re = vale 10',
     curiosity:
-      'Non hai le genovesi? Si può usare un mazzo francese da 52 togliendo 8, 9, 10 e Jolly. Le figure mantengono il valore: Jack = 8, Donna = 9, Re = 10!',
+      'Nelle carte genovesi i semi hanno i simboli francesi, dove i quadri sono chiamati "Denari". Si può usare anche un mazzo francese da 52 togliendo 8, 9, 10 e Jolly: le figure mantengono il valore Jack = 8, Donna = 9, Re = 10!',
   },
   {
     title: 'Il Monte Iniziale (15, 30 o Due Assi)',
@@ -75,7 +75,7 @@ export const CIRULLA_GUIDE: GuideSection[] = [
     content:
       'All\'inizio di ogni mano da 3 carte, prima di giocare, controlla bene cosa hai ricevuto:\n\n• Somma ≤ 9 ("Bussata da tre"): bussa sul tavolo! Guadagni subito 3 Scope (3 punti) e giochi la mano a carte scoperte.\n• Tre carte uguali ("Bussata da dieci"): bussa forte sul tavolo! Guadagni subito 10 Scope (10 punti) e giochi a carte scoperte tra i complimenti (e i mugugni) degli avversari.',
     curiosity:
-      'La Matta: Il 7 di Cuori è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per consentire una bussata da tre o da dieci!',
+      'La Matta: Il 7 di Cuori (o 7 di Spade) è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per consentire una bussata da tre o da dieci!',
   },
   {
     title: 'Le Prese: Regola del 15, Uguale e Somma',
@@ -95,9 +95,9 @@ export const CIRULLA_GUIDE: GuideSection[] = [
     title: 'Calcolo dei Punti di Mazzo e Cappotto',
     badge: 'PUNTEGGI',
     content:
-      'A fine smazzata si conteggiano:\n\n• Carte: chi ha più di 20 carte guadagna 1 punto.\n• Quadri: chi ha più di 5 Quadri guadagna 1 punto.\n• Settebello: il 7 di Quadri vale 1 punto.\n• Primiera: il miglior punteggio (chi ha i 7, i 6, gli Assi) vale 1 punto.\n• Scope: 1 punto per ogni scopa effettuata.\n• Piccola: Asso, 2 e 3 di Quadri = 3 punti. Se hai anche 4, 5, 6, 7 consecutivi vale fino a 7 punti!\n• Grande: Jack (8), Donna (9) e Re (10) di Quadri = 5 punti. Se manca una carta è "rotta" (0 pt).\n\n🔥 CAPPOTTO DI Quadri: Se un giocatore prende tutti i 10 Quadri, fa cappotto e vince immediatamente la partita!',
+      'A fine smazzata si conteggiano:\n\n• Carte: chi ha più di 20 carte guadagna 1 punto.\n• Denari: chi ha più di 5 Denari (Quadri ♦) guadagna 1 punto.\n• Settebello: il 7 di Denari (7♦) vale 1 punto.\n• Primiera: il miglior punteggio nei 4 semi vale 1 punto.\n• Scope: 1 punto per ogni scopa effettuata.\n• Piccola: Asso, 2 e 3 di Denari = 3 punti. Se hai anche 4, 5, 6, 7 consecutivi vale fino a 7 punti!\n• Grande: Jack (8), Donna (9) e Re (10) di Denari = 5 punti. Se manca una carta è "rotta" (0 pt).\n\n🔥 CAPPOTTO DI DENARI: Se un giocatore prende tutti i 10 Denari (Quadri), fa cappotto e vince immediatamente la partita!',
     curiosity:
-      'I Quadri ("palanche") sono il seme più prestigioso della Cirulla: chi controlla i Quadri controlla il destino della partita.',
+      'I Denari ("palanche") sono il seme più prestigioso della Cirulla: chi controlla i Denari controlla il destino della partita.',
   },
   {
     title: 'Vittoria della Partita',

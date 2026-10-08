@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { CardView } from './CardView';
-import { Card } from '../types/card';
+import { Card, DeckStyle } from '../types/card';
 
 interface ScopaBannerProps {
   visible: boolean;
@@ -63,6 +63,7 @@ interface AccusaBannerProps {
   points: number;
   cards: Card[];
   usedMatta?: boolean;
+  deckStyle?: DeckStyle;
 }
 
 export const AccusaBanner: React.FC<AccusaBannerProps> = ({
@@ -72,6 +73,7 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
   points,
   cards,
   usedMatta,
+  deckStyle,
 }) => {
   const translateY = useRef(new Animated.Value(-50)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -123,6 +125,7 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
             <CardView
               key={`accusa-${card.id}-${idx}`}
               card={card}
+              deckStyle={deckStyle}
               width={54}
               height={78}
             />

@@ -112,7 +112,7 @@ export const DealSummaryModal: React.FC<DealSummaryModalProps> = ({
             {/* Piccola */}
             {(scores.piccolaPlayerPoints > 0 || scores.piccolaAIPoints > 0) &&
               renderRow(
-                'Piccola Quadri',
+                'Piccola (Denari ♦)',
                 scores.piccolaPlayerPoints > 0 ? `+${scores.piccolaPlayerPoints} pt` : '-',
                 scores.piccolaAIPoints > 0 ? `+${scores.piccolaAIPoints} pt` : '-',
                 scores.piccolaPlayerPoints > scores.piccolaAIPoints ? 'player' : 'ai'
@@ -121,7 +121,7 @@ export const DealSummaryModal: React.FC<DealSummaryModalProps> = ({
             {/* Grande */}
             {(scores.grandePlayerPoints > 0 || scores.grandeAIPoints > 0) &&
               renderRow(
-                'Grande Quadri',
+                'Grande (Denari ♦)',
                 scores.grandePlayerPoints > 0 ? '+5 pt' : '-',
                 scores.grandeAIPoints > 0 ? '+5 pt' : '-',
                 scores.grandePlayerPoints > scores.grandeAIPoints ? 'player' : 'ai'

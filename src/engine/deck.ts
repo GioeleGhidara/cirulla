@@ -1,12 +1,18 @@
-import { Card, Suit } from '../types/card';
+import { Card, DeckStyle, Suit } from '../types/card';
 import { RANK_NAMES, SUIT_NAMES } from '../constants/rules';
 
-const SUITS: Suit[] = ['denari', 'coppe', 'spade', 'bastoni'];
+const FRENCH_GENOVESI_SUITS: Suit[] = ['denari', 'cuori', 'picche', 'fiori'];
+const ITALIAN_REGIONAL_SUITS: Suit[] = ['denari', 'coppe', 'spade', 'bastoni'];
 
-export function createDeck(): Card[] {
+export function createDeck(deckStyle: DeckStyle = 'genovesi'): Card[] {
+  const suits =
+    deckStyle === 'piacentine' || deckStyle === 'napoletane'
+      ? ITALIAN_REGIONAL_SUITS
+      : FRENCH_GENOVESI_SUITS;
+
   const deck: Card[] = [];
 
-  for (const suit of SUITS) {
+  for (const suit of suits) {
     for (let rank = 1; rank <= 10; rank++) {
       const name = `${RANK_NAMES[rank]} di ${SUIT_NAMES[suit]}`;
       deck.push({

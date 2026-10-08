@@ -1,7 +1,12 @@
-export type ItalianSuit = 'denari' | 'coppe' | 'spade' | 'bastoni';
-export type FrenchSuit = 'Quadri' | 'Cuori' | 'Picche' | 'Fiori' | 'quadri' | 'cuori' | 'picche' | 'fiori';
-
-export type Suit = ItalianSuit | FrenchSuit;
+export type Suit =
+  | 'denari'
+  | 'cuori'
+  | 'picche'
+  | 'fiori'
+  | 'coppe'
+  | 'spade'
+  | 'bastoni'
+  | 'quadri';
 
 export type DeckStyle = 'genovesi' | 'piacentine' | 'napoletane';
 
@@ -46,10 +51,6 @@ export interface DealScores {
   readonly denariPlayer: number;
   readonly denariAI: number;
   readonly denariPoint: ScoringWinner;
-
-  readonly QuadriPlayer?: number;
-  readonly QuadriAI?: number;
-  readonly QuadriPoint?: ScoringWinner;
 
   readonly settebelloPoint: PlayerSide | 'none';
 

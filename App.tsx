@@ -67,6 +67,7 @@ export default function App() {
       <CaptureChoiceModal
         visible={game.isChoiceModalVisible}
         moves={game.choiceMoves}
+        deckStyle={game.settings.deckStyle}
         onSelectMove={game.executeChosenCapture}
         onCancel={game.cancelChoiceModal}
       />
@@ -121,6 +122,7 @@ export default function App() {
         points={game.accusaBanner.points}
         cards={game.accusaBanner.cards}
         usedMatta={game.accusaBanner.usedMatta}
+        deckStyle={game.settings.deckStyle}
       />
 
       <MonteBanner
