@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { CardView } from './CardView';
-import { Card, DeckStyle, CaptureMove } from '../types/card';
+import { Card, DeckStyle, CardGraphicStyle, CaptureMove } from '../types/card';
 import { Ionicons } from '@expo/vector-icons';
 
 interface GameTableProps {
   deckStyle: DeckStyle;
+  graphicStyle?: CardGraphicStyle;
   playerHand: Card[];
   aiHand: Card[];
   aiHandRevealed: boolean;
@@ -26,6 +27,7 @@ interface GameTableProps {
 
 export const GameTable: React.FC<GameTableProps> = ({
   deckStyle,
+  graphicStyle,
   playerHand,
   aiHand,
   aiHandRevealed,
@@ -89,6 +91,7 @@ export const GameTable: React.FC<GameTableProps> = ({
               card={card}
               faceDown={!aiHandRevealed}
               deckStyle={deckStyle}
+              graphicStyle={graphicStyle}
               width={smallCardWidth}
               height={smallCardHeight}
               style={{ marginHorizontal: -4 }}
@@ -124,6 +127,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                     key={`table-${card.id}`}
                     card={card}
                     deckStyle={deckStyle}
+                    graphicStyle={graphicStyle}
                     width={cardWidth}
                     height={cardHeight}
                     isSelected={isSelectedInMove}
@@ -172,6 +176,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                 <CardView
                   card={lastPlayerCard}
                   deckStyle={deckStyle}
+                  graphicStyle={graphicStyle}
                   width={smallCardWidth}
                   height={smallCardHeight}
                 />
@@ -309,6 +314,7 @@ export const GameTable: React.FC<GameTableProps> = ({
                 key={`player-hand-${card.id}`}
                 card={card}
                 deckStyle={deckStyle}
+                graphicStyle={graphicStyle}
                 isSelected={isSelected}
                 isPlayable={isPlayerTurn}
                 onPress={() => isPlayerTurn && onSelectPlayerCard(card)}

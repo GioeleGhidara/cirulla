@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cirulla - Campionario Layout Completo Carte</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --gold: #f59e0b;
+      --red: #ef4444;
+      --green: #10b981;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, #090d16 100%);
+      color: var(--text);
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #fef08a, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    .rules-banner {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-around;
+      font-size: 13px;
+    }
+    .rule-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rule-badge {
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 11px;
+    }
+    .suit-section {
+      margin-bottom: 32px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .suit-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .suit-title {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .suit-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+    }
+    .card-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .card-card:hover {
+      transform: translateY(-4px);
+      border-color: #38bdf8;
+    }
+    .card-visual {
+      width: 76px;
+      height: 112px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 4px;
+    }
+    .card-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .card-meta {
+      width: 100%;
+      margin-top: 6px;
+      text-align: center;
+    }
+    .card-name {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-subtext {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      padding: 0 2px;
+    }
+    .card-val {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+    .card-badge {
+      margin-top: 4px;
+      font-size: 7.5px;
+      font-weight: 900;
+      padding: 2px 4px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: inline-block;
+    }
+    .badge-settebello {
+      background: #f59e0b;
+      color: #78350f;
+    }
+    .badge-matta {
+      background: #3b82f6;
+      color: #eff6ff;
+    }
+    .badge-piccola {
+      background: #10b981;
+      color: #064e3b;
+    }
+    .badge-grande {
+      background: #ec4899;
+      color: #831843;
+    }
+    .badge-asso {
+      background: #8b5cf6;
+      color: #ede9fe;
+    }
+    /* Vector card layout */
+    .corner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+    }
+    .corner.bottom {
+      transform: rotate(180deg);
+    }
+    .rank-text {
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .red { color: #dc2626; }
+    .black { color: #0f172a; }
+    .center-figure {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .figure-tag {
+      background: #0f172a;
+      color: #fff;
+      font-size: 7px;
+      font-weight: 900;
+      padding: 1px 3px;
+      border-radius: 3px;
+    }
+    .figure-num {
+      font-size: 10px;
+      font-weight: 900;
+      color: #334155;
+    }
+    .special-overlay {
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      right: 2px;
+      font-size: 6.5px;
+      font-weight: 900;
+      text-align: center;
+      padding: 1px 0;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>CIRULLA LIGURE - CAMPIONARIO COMPLETO CARTE</h1>
+      <p class="subtitle">
+        Layout dei 4 semi tradizionali per 40 carte totali. Carte Genovesi con segni francesi (Cuori ♥, Quadri/Denari ♦, Picche ♠, Fiori ♣).
+      </p>
+    </header>
+
+    <div class="rules-banner">
+      <div class="rule-item">
+        <span class="rule-badge">FIGURE</span>
+        <span><strong>Jack (Fante) = 8</strong> | <strong>Donna = 9</strong> | <strong>Re = 10</strong></span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-badge">SETTEBELLO</span>
+        <span><strong>7 di Denari (♦)</strong> = +1 pt mazzo</span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-badge">MATTA</span>
+        <span><strong>7 di Cuori (♥)</strong> = Jolly per Bussate (3 o 10 pt)</span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-badge">CAPPOTTO</span>
+        <span><strong>10 Denari presi</strong> = Vittoria immediata</span>
+      </div>
+    </div>
+
+    <!-- 1. SEME DI DENARI (QUADRI) -->
+    <div class="suit-section">
+      <div class="suit-header">
+        <div class="suit-title" style="color: #ef4444;">
+          <span>♦ DENARI (QUADRI)</span>
+          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Il seme più nobile ("palanche")</span>
+        </div>
+        <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
+      </div>
+      <div class="cards-row" id="row-denari"></div>
+    </div>
+
+    <!-- 2. SEME DI CUORI -->
+    <div class="suit-section">
+      <div class="suit-header">
+        <div class="suit-title" style="color: #ef4444;">
+          <span>♥ CUORI</span>
+          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Include la leggendaria Matta (7♥)</span>
+        </div>
+        <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
+      </div>
+      <div class="cards-row" id="row-cuori"></div>
+    </div>
+
+    <!-- 3. SEME DI PICCHE -->
+    <div class="suit-section">
+      <div class="suit-header">
+        <div class="suit-title" style="color: #94a3b8;">
+          <span>♠ PICCHE</span>
+          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Seme nero di picca</span>
+        </div>
+        <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
+      </div>
+      <div class="cards-row" id="row-picche"></div>
+    </div>
+
+    <!-- 4. SEME DI FIORI -->
+    <div class="suit-section">
+      <div class="suit-header">
+        <div class="suit-title" style="color: #94a3b8;">
+          <span>♣ FIORI</span>
+          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Seme nero a trifoglio</span>
+        </div>
+        <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
+      </div>
+      <div class="cards-row" id="row-fiori"></div>
+    </div>
+  </div>
+
+  <script>
+    const suits = [
+      { id: 'denari', code: 'D', name: 'Denari', symbol: '♦', color: 'red' },
+      { id: 'cuori', code: 'H', name: 'Cuori', symbol: '♥', color: 'red' },
+      { id: 'picche', code: 'S', name: 'Picche', symbol: '♠', color: 'black' },
+      { id: 'fiori', code: 'C', name: 'Fiori', symbol: '♣', color: 'black' },
+    ];
+
+    const cardsData = [
+      { rank: 1, val: 1, codeRank: 'A', name: 'Asso', primiera: 16 },
+      { rank: 2, val: 2, codeRank: '2', name: 'Due', primiera: 12 },
+      { rank: 3, val: 3, codeRank: '3', name: 'Tre', primiera: 13 },
+      { rank: 4, val: 4, codeRank: '4', name: 'Quattro', primiera: 14 },
+      { rank: 5, val: 5, codeRank: '5', name: 'Cinque', primiera: 15 },
+      { rank: 6, val: 6, codeRank: '6', name: 'Sei', primiera: 18 },
+      { rank: 7, val: 7, codeRank: '7', name: 'Sette', primiera: 21 },
+      { rank: 8, val: 8, codeRank: 'J', name: 'Jack', primiera: 10 },
+      { rank: 9, val: 9, codeRank: 'Q', name: 'Donna', primiera: 10 },
+      { rank: 10, val: 10, codeRank: 'K', name: 'Re', primiera: 10 },
+    ];
+
+    suits.forEach(suit => {
+      const container = document.getElementById('row-' + suit.id);
+      cardsData.forEach(card => {
+        const imgUrl = `https://deckofcardsapi.com/static/img/${card.codeRank}${suit.code}.png`;
+        const cardBox = document.createElement('div');
+        cardBox.className = 'card-card';
+
+        let badgeHtml = '';
+        if (suit.id === 'denari' && card.rank === 7) {
+          badgeHtml = '<span class="card-badge badge-settebello">★ 7 BELLO (+1)</span>';
+        } else if (suit.id === 'cuori' && card.rank === 7) {
+          badgeHtml = '<span class="card-badge badge-matta">🃏 LA MATTA</span>';
+        } else if (suit.id === 'denari' && card.rank <= 3) {
+          badgeHtml = '<span class="card-badge badge-piccola">PICCOLA</span>';
+        } else if (suit.id === 'denari' && card.rank >= 8) {
+          badgeHtml = '<span class="card-badge badge-grande">GRANDE</span>';
+        } else if (card.rank === 1) {
+          badgeHtml = '<span class="card-badge badge-asso">ASSO PIGLIA</span>';
+        }
+
+        cardBox.innerHTML = `
+          <div class="card-visual">
+            <img src="${imgUrl}" alt="${card.name} di ${suit.name}" loading="lazy" />
+          </div>
+          <div class="card-meta">
+            <div class="card-name">${card.name} di ${suit.name}</div>
+            <div class="card-subtext">
+              <span class="card-val">Val: ${card.val}</span>
+              <span>P: ${card.primiera}pt</span>
+            </div>
+            ${badgeHtml}
+          </div>
+        `;
+        container.appendChild(cardBox);
+      });
+    });
+  </script>
+</body>
+</html>

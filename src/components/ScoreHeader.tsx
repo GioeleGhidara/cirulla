@@ -18,6 +18,7 @@ interface ScoreHeaderProps {
   onOpenSettings: () => void;
   onOpenRules: () => void;
   onOpenStats: () => void;
+  onOpenDeckGallery?: () => void;
 }
 
 export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
@@ -34,6 +35,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   onOpenSettings,
   onOpenRules,
   onOpenStats,
+  onOpenDeckGallery,
 }) => {
   const playerDenari = playerCaptured.filter(isDenari).length;
   const aiDenari = aiCaptured.filter(isDenari).length;
@@ -53,6 +55,15 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
         </View>
 
         <View style={styles.actionsGroup}>
+          {onOpenDeckGallery && (
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={onOpenDeckGallery}
+              accessibilityLabel="Layout Carte"
+            >
+              <Ionicons name="images-outline" size={20} color="#38bdf8" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={onOpenRules}

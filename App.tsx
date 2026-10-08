@@ -16,6 +16,7 @@ import { GameOverModal } from './src/components/GameOverModal';
 import { SettingsModal } from './src/components/SettingsModal';
 import { RulesModal } from './src/components/RulesModal';
 import { StatsModal } from './src/components/StatsModal';
+import { DeckGalleryModal } from './src/components/DeckGalleryModal';
 
 export default function App() {
   const game = useCirullaGame();
@@ -23,6 +24,7 @@ export default function App() {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isRulesVisible, setIsRulesVisible] = useState(false);
   const [isStatsVisible, setIsStatsVisible] = useState(false);
+  const [isDeckGalleryVisible, setIsDeckGalleryVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -42,10 +44,12 @@ export default function App() {
         onOpenSettings={() => setIsSettingsVisible(true)}
         onOpenRules={() => setIsRulesVisible(true)}
         onOpenStats={() => setIsStatsVisible(true)}
+        onOpenDeckGallery={() => setIsDeckGalleryVisible(true)}
       />
 
       <GameTable
         deckStyle={game.settings.deckStyle}
+        graphicStyle={game.settings.cardGraphicStyle}
         playerHand={game.playerHand}
         aiHand={game.aiHand}
         aiHandRevealed={game.aiHandRevealed}
@@ -95,6 +99,7 @@ export default function App() {
         onUpdateSettings={game.updateSettings}
         onClose={() => setIsSettingsVisible(false)}
         onRestartMatch={game.restartMatch}
+        onOpenDeckGallery={() => setIsDeckGalleryVisible(true)}
       />
 
       <RulesModal
@@ -107,6 +112,15 @@ export default function App() {
         stats={game.stats}
         onClose={() => setIsStatsVisible(false)}
         onResetStats={game.resetStats}
+      />
+
+      <DeckGalleryModal
+        visible={isDeckGalleryVisible}
+        onClose={() => setIsDeckGalleryVisible(false)}
+        currentDeckStyle={game.settings.deckStyle}
+        currentGraphicStyle={game.settings.cardGraphicStyle}
+        onSelectGraphicStyle={(style) => game.updateSettings({ ...game.settings, cardGraphicStyle: style })}
+        onSelectDeckStyle={(style) => game.updateSettings({ ...game.settings, deckStyle: style })}
       />
 
       <ScopaBanner

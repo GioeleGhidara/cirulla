@@ -6,6 +6,7 @@ const STATS_KEY = '@cirulla_stats_v1';
 
 export const DEFAULT_SETTINGS: GameSettings = {
   deckStyle: 'genovesi',
+  cardGraphicStyle: 'moderno',
   aiDifficulty: 'normale',
   targetScore: 51,
   soundEnabled: true,

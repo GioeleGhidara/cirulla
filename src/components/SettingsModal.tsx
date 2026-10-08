@@ -9,6 +9,7 @@ interface SettingsModalProps {
   onUpdateSettings: (newSettings: GameSettings) => void;
   onClose: () => void;
   onRestartMatch: () => void;
+  onOpenDeckGallery?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -17,6 +18,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateSettings,
   onClose,
   onRestartMatch,
+  onOpenDeckGallery,
 }) => {
   if (!visible) return null;
 
@@ -66,6 +68,62 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   : 'Semi regionali italiani: Coppe 🏆, Denari 🪙, Spade ⚔, Bastoni 🪵.'}
               </Text>
             </View>
+
+            {/* Aspetto Grafico Carte */}
+            {settings.deckStyle === 'genovesi' && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Aspetto Grafico Carte</Text>
+                <View style={styles.pillRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.pillBtn,
+                      (settings.cardGraphicStyle ?? 'moderno') === 'moderno' && styles.pillBtnActive,
+                    ]}
+                    onPress={() => update({ cardGraphicStyle: 'moderno' })}
+                  >
+                    <Text
+                      style={[
+                        styles.pillText,
+                        (settings.cardGraphicStyle ?? 'moderno') === 'moderno' && styles.pillTextActive,
+                      ]}
+                    >
+                      Vettoriale Moderno
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.pillBtn,
+                      settings.cardGraphicStyle === 'classico' && styles.pillBtnActive,
+                    ]}
+                    onPress={() => update({ cardGraphicStyle: 'classico' })}
+                  >
+                    <Text
+                      style={[
+                        styles.pillText,
+                        settings.cardGraphicStyle === 'classico' && styles.pillTextActive,
+                      ]}
+                    >
+                      Classico Illustrato
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Bottone Campionario Layout Carte */}
+            {onOpenDeckGallery && (
+              <TouchableOpacity
+                style={styles.galleryNavBtn}
+                onPress={() => {
+                  onClose();
+                  onOpenDeckGallery();
+                }}
+              >
+                <Ionicons name="images-outline" size={18} color="#38bdf8" />
+                <Text style={styles.galleryNavText}>Mostra Tutti i 40 Layout delle Carte</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Punteggio Obiettivo */}
             <View style={styles.section}>
@@ -259,6 +317,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 4,
     fontStyle: 'italic',
+  },
+  galleryNavBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#1e293b',
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#0284c7',
+    marginTop: 4,
+  },
+  galleryNavText: {
+    color: '#38bdf8',
+    fontSize: 12.5,
+    fontWeight: '800',
   },
   toggleRow: {
     flexDirection: 'row',

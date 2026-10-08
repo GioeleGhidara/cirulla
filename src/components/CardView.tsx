@@ -1,13 +1,42 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Image } from 'react-native';
 import Svg, { Path, Circle, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { Card, DeckStyle, Suit } from '../types/card';
+import { Card, CardGraphicStyle, DeckStyle, Suit } from '../types/card';
 import { isMatta, isSettebello } from '../engine/rules';
+
+export function getDeckOfCardsApiUrl(card: Card): string {
+  const normSuit = (card.suit || '').toLowerCase();
+  const suitLetter =
+    normSuit === 'denari' || normSuit === 'quadri'
+      ? 'D'
+      : normSuit === 'cuori'
+      ? 'H'
+      : normSuit === 'picche'
+      ? 'S'
+      : normSuit === 'fiori'
+      ? 'C'
+      : '';
+  if (!suitLetter) return '';
+
+  const rankLetter =
+    card.rank === 1
+      ? 'A'
+      : card.rank === 8
+      ? 'J'
+      : card.rank === 9
+      ? 'Q'
+      : card.rank === 10
+      ? 'K'
+      : String(card.rank);
+
+  return `https://deckofcardsapi.com/static/img/${rankLetter}${suitLetter}.png`;
+}
 
 interface CardViewProps {
   card?: Card;
   faceDown?: boolean;
   deckStyle?: DeckStyle;
+  graphicStyle?: CardGraphicStyle;
   isSelected?: boolean;
   isPlayable?: boolean;
   isHighlighted?: boolean;
@@ -238,10 +267,75 @@ const FigureArtwork: React.FC<{
   );
 };
 
+const PipLayout: React.FC<{
+  rank: number;
+  suit: Suit;
+  deckStyle?: DeckStyle;
+  cardWidth: number;
+  cardHeight: number;
+}> = ({ rank, suit, deckStyle, cardWidth, cardHeight }) => {
+  const pipSize = Math.max(9, Math.min(15, cardWidth * 0.18));
+  const largePipSize = Math.max(22, cardWidth * 0.36);
+
+  if (rank === 1) {
+    return (
+      <View style={styles.centerPipSingle}>
+        <SuitIcon suit={suit} deckStyle={deckStyle} size={largePipSize} />
+      </View>
+    );
+  }
+
+  if (rank === 2) {
+    return (
+      <View style={[styles.pipSingleCol, { height: cardHeight * 0.48 }]}>
+        <SuitIcon suit={suit} deckStyle={deckStyle} size={pipSize} />
+        <SuitIcon suit={suit} deckStyle={deckStyle} size={pipSize} />
+      </View>
+    );
+  }
+
+  if (rank === 3) {
+    return (
+      <View style={[styles.pipSingleCol, { height: cardHeight * 0.54 }]}>
+        <SuitIcon suit={suit} deckStyle={deckStyle} size={pipSize} />
+        <SuitIcon suit={suit} deckStyle={deckStyle} size={pipSize} />
+        <SuitIcon suit={suit} deckStyle={deckStyle} size={pipSize} />
+      </View>
+    );
+  }
+
+  const leftPips = rank >= 6 ? 3 : 2;
+  const rightPips = rank >= 6 ? 3 : 2;
+  const hasCenterPip = rank === 5 || rank === 7;
+
+  return (
+    <View style={[styles.pipGrid, { width: cardWidth * 0.54, height: cardHeight * 0.54 }]}>
+      <View style={styles.pipColumn}>
+        {Array.from({ length: leftPips }).map((_, i) => (
+          <SuitIcon key={`left-${i}`} suit={suit} deckStyle={deckStyle} size={pipSize} />
+        ))}
+      </View>
+
+      {hasCenterPip && (
+        <View style={styles.pipCenterColumn}>
+          <SuitIcon suit={suit} deckStyle={deckStyle} size={pipSize} />
+        </View>
+      )}
+
+      <View style={styles.pipColumn}>
+        {Array.from({ length: rightPips }).map((_, i) => (
+          <SuitIcon key={`right-${i}`} suit={suit} deckStyle={deckStyle} size={pipSize} />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 export const CardView: React.FC<CardViewProps> = ({
   card,
   faceDown = false,
   deckStyle = 'genovesi',
+  graphicStyle = 'moderno',
   isSelected = false,
   isPlayable = false,
   isHighlighted = false,
@@ -250,6 +344,8 @@ export const CardView: React.FC<CardViewProps> = ({
   height = 104,
   style,
 }) => {
+  const [imageLoadError, setImageLoadError] = useState(false);
+
   if (faceDown || !card) {
     return (
       <View
@@ -302,6 +398,10 @@ export const CardView: React.FC<CardViewProps> = ({
     ? normSuit === 'coppe' || normSuit === 'denari'
     : normSuit === 'cuori' || normSuit === 'denari' || normSuit === 'quadri';
 
+  const showClassicImage =
+    graphicStyle === 'classico' && !isRegional && !imageLoadError;
+  const classicImgUrl = showClassicImage ? getDeckOfCardsApiUrl(card) : '';
+
   const cardContent = (
     <View
       style={[
@@ -314,37 +414,69 @@ export const CardView: React.FC<CardViewProps> = ({
         style,
       ]}
     >
-      {/* Top Left Rank & Suit */}
-      <View style={styles.cornerTopLeft}>
-        <Text
-          style={[
-            styles.rankText,
-            isRed ? styles.redText : styles.blackText,
-          ]}
-        >
-          {card.rank}
-        </Text>
-        <SuitIcon suit={card.suit} deckStyle={deckStyle} size={width * 0.18} />
-      </View>
-
-      {/* Center artwork */}
-      <View style={styles.centerArea}>
-        {isFigure ? (
-          <FigureArtwork
-            rank={card.rank}
-            suit={card.suit}
-            deckStyle={deckStyle}
-            size={width * 0.65}
+      {showClassicImage && classicImgUrl ? (
+        <View style={styles.classicImageContainer}>
+          <Image
+            source={{ uri: classicImgUrl }}
+            style={styles.classicCardImage}
+            resizeMode="contain"
+            onError={() => setImageLoadError(true)}
           />
-        ) : (
-          <View style={styles.pipsContainer}>
-            <SuitIcon suit={card.suit} deckStyle={deckStyle} size={width * 0.36} />
-            {card.rank > 1 && (
-              <Text style={styles.centerRankText}>{card.rank}</Text>
+          {isFigure && (
+            <View style={styles.cirullaFigureValPill}>
+              <Text style={styles.cirullaFigureValText}>Val: {card.value}</Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        <>
+          {/* Top Left Rank & Suit */}
+          <View style={styles.cornerTopLeft}>
+            <Text
+              style={[
+                styles.rankText,
+                isRed ? styles.redText : styles.blackText,
+              ]}
+            >
+              {card.rank}
+            </Text>
+            <SuitIcon suit={card.suit} deckStyle={deckStyle} size={width * 0.18} />
+          </View>
+
+          {/* Center artwork */}
+          <View style={styles.centerArea}>
+            {isFigure ? (
+              <FigureArtwork
+                rank={card.rank}
+                suit={card.suit}
+                deckStyle={deckStyle}
+                size={width * 0.65}
+              />
+            ) : (
+              <PipLayout
+                rank={card.rank}
+                suit={card.suit}
+                deckStyle={deckStyle}
+                cardWidth={width}
+                cardHeight={height}
+              />
             )}
           </View>
-        )}
-      </View>
+
+          {/* Bottom Right Rank & Suit (Inverted) */}
+          <View style={styles.cornerBottomRight}>
+            <Text
+              style={[
+                styles.rankText,
+                isRed ? styles.redText : styles.blackText,
+              ]}
+            >
+              {card.rank}
+            </Text>
+            <SuitIcon suit={card.suit} deckStyle={deckStyle} size={width * 0.18} />
+          </View>
+        </>
+      )}
 
       {/* Badges for special cards: Settebello & Matta */}
       {isSettebelloCard && (
@@ -358,19 +490,6 @@ export const CardView: React.FC<CardViewProps> = ({
           <Text style={styles.mattaBadgeText}>🃏 MATTA</Text>
         </View>
       )}
-
-      {/* Bottom Right Rank & Suit (Inverted) */}
-      <View style={styles.cornerBottomRight}>
-        <Text
-          style={[
-            styles.rankText,
-            isRed ? styles.redText : styles.blackText,
-          ]}
-        >
-          {card.rank}
-        </Text>
-        <SuitIcon suit={card.suit} deckStyle={deckStyle} size={width * 0.18} />
-      </View>
     </View>
   );
 
@@ -439,6 +558,36 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     backgroundColor: '#ecfdf5',
   },
+  classicImageContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+  },
+  classicCardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cirullaFigureValPill: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    borderRadius: 3,
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+    borderWidth: 0.5,
+    borderColor: '#eab308',
+  },
+  cirullaFigureValText: {
+    color: '#fde047',
+    fontSize: 7.5,
+    fontWeight: '900',
+  },
   cornerTopLeft: {
     alignItems: 'center',
     alignSelf: 'flex-start',
@@ -474,15 +623,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
   },
-  pipsContainer: {
+  centerPipSingle: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  centerRankText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748b',
-    marginTop: 2,
+  pipSingleCol: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  pipGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  pipColumn: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '100%',
+  },
+  pipCenterColumn: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
   },
   figureContainer: {
     alignItems: 'center',

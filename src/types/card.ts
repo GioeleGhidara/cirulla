@@ -89,8 +89,11 @@ export interface GameStats {
   readonly accuseDieciMade: number;
 }
 
+export type CardGraphicStyle = 'moderno' | 'classico';
+
 export interface GameSettings {
   readonly deckStyle: DeckStyle;
+  readonly cardGraphicStyle?: CardGraphicStyle;
   readonly aiDifficulty: AIDifficulty;
   readonly targetScore: 31 | 51;
   readonly soundEnabled: boolean;
