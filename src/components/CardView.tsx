@@ -149,6 +149,84 @@ const PipLayout: React.FC<{
   );
 };
 
+export const DalNegroCardBack: React.FC<{
+  width: number;
+  height: number;
+  color?: 'blue' | 'red';
+}> = ({ width, height, color = 'blue' }) => {
+  const primaryColor = color === 'blue' ? '#1e3a8a' : '#881337';
+  const darkColor = color === 'blue' ? '#0f172a' : '#4c0519';
+  const accentGold = '#fbbf24';
+  const lightGold = '#fef08a';
+
+  return (
+    <View style={{ width, height, overflow: 'hidden', borderRadius: 6, backgroundColor: '#ffffff' }}>
+      <Svg width={width} height={height} viewBox="0 0 100 148">
+        <Defs>
+          <LinearGradient id={`cardBackGrad-${color}`} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0%" stopColor={primaryColor} />
+            <Stop offset="50%" stopColor={darkColor} />
+            <Stop offset="100%" stopColor={primaryColor} />
+          </LinearGradient>
+        </Defs>
+
+        {/* Outer White Card Margin */}
+        <Rect x="1" y="1" width="98" height="146" rx="6" ry="6" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+
+        {/* Colored Field */}
+        <Rect x="4" y="4" width="92" height="140" rx="4" ry="4" fill={`url(#cardBackGrad-${color})`} />
+
+        {/* Gold Outer Filigree Border */}
+        <Rect x="7" y="7" width="86" height="134" rx="3" ry="3" fill="none" stroke={accentGold} strokeWidth="1.2" />
+
+        {/* Inner Dashed Border */}
+        <Rect
+          x="10"
+          y="10"
+          width="80"
+          height="128"
+          rx="2"
+          ry="2"
+          fill="none"
+          stroke="rgba(255,255,255,0.4)"
+          strokeWidth="0.8"
+          strokeDasharray="3,2"
+        />
+
+        {/* Corner Flourishes */}
+        <Path d="M12 12 L20 12 M12 12 L12 20" stroke={accentGold} strokeWidth="1.5" />
+        <Path d="M88 12 L80 12 M88 12 L88 20" stroke={accentGold} strokeWidth="1.5" />
+        <Path d="M12 136 L20 136 M12 136 L12 128" stroke={accentGold} strokeWidth="1.5" />
+        <Path d="M88 136 L80 136 M88 136 L88 128" stroke={accentGold} strokeWidth="1.5" />
+
+        {/* Diamond Lattice Pattern */}
+        <Path
+          d="M26 44 L38 56 L26 68 L14 56 Z M74 44 L86 56 L74 68 L62 56 Z M26 80 L38 92 L26 104 L14 92 Z M74 80 L86 92 L74 104 L62 92 Z"
+          fill="none"
+          stroke="rgba(251, 191, 36, 0.45)"
+          strokeWidth="0.9"
+        />
+        <Circle cx="26" cy="56" r="1.5" fill={lightGold} />
+        <Circle cx="74" cy="56" r="1.5" fill={lightGold} />
+        <Circle cx="26" cy="92" r="1.5" fill={lightGold} />
+        <Circle cx="74" cy="92" r="1.5" fill={lightGold} />
+
+        {/* Central Medallion */}
+        <Circle cx="50" cy="74" r="21" fill={darkColor} stroke={accentGold} strokeWidth="1.6" />
+        <Circle cx="50" cy="74" r="17" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" strokeDasharray="2,2" />
+
+        {/* Symmetrical 8-point Star */}
+        <Path
+          d="M50 59 L53 69 L63 66 L57 74 L63 82 L53 79 L50 89 L47 79 L37 82 L43 74 L37 66 L47 69 Z"
+          fill={accentGold}
+        />
+        <Circle cx="50" cy="74" r="5" fill={primaryColor} stroke={lightGold} strokeWidth="1" />
+        <Circle cx="50" cy="74" r="2" fill={lightGold} />
+      </Svg>
+    </View>
+  );
+};
+
 const CardViewBase: React.FC<CardViewProps> = ({
   card,
   faceDown = false,
@@ -174,7 +252,7 @@ const CardViewBase: React.FC<CardViewProps> = ({
       ? 'moderno'
       : 'genovesi_dal_negro');
 
-  const useSkinBack = activeSkinId !== 'moderno';
+  const useSkinBack = activeSkinId !== 'moderno' && activeSkinId !== 'genovesi_dal_negro';
   const skinBack = useSkinBack ? getSkinCardBack(activeSkinId) : null;
 
   if (faceDown || !card) {
@@ -188,42 +266,15 @@ const CardViewBase: React.FC<CardViewProps> = ({
           style,
         ]}
       >
-        {skinBack ? (
+        {activeSkinId === 'genovesi_dal_negro' || activeSkinId === 'moderno' || !skinBack ? (
+          <DalNegroCardBack width={width} height={height} color="blue" />
+        ) : (
           <View style={styles.classicImageContainer}>
             <Image
               source={skinBack}
               style={styles.classicCardImage}
               resizeMode="cover"
             />
-          </View>
-        ) : (
-          <View style={styles.backPatternInner}>
-            <Svg width={width - 8} height={height - 8} viewBox="0 0 60 88">
-              <Defs>
-                <LinearGradient id="backGrad" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0%" stopColor="#1e293b" />
-                  <Stop offset="50%" stopColor="#0f172a" />
-                  <Stop offset="100%" stopColor="#020617" />
-                </LinearGradient>
-              </Defs>
-              <Rect x="0" y="0" width="60" height="88" rx="5" fill="url(#backGrad)" />
-              <Rect
-                x="3"
-                y="3"
-                width="54"
-                height="82"
-                rx="4"
-                fill="none"
-                stroke="#e2e8f0"
-                strokeWidth="0.8"
-                strokeDasharray="2,2"
-              />
-              {/* Cross filigree pattern */}
-              <Path d="M4 4 L56 84 M56 4 L4 84" stroke="#334155" strokeWidth="0.5" />
-              <Circle cx="30" cy="44" r="14" fill="#1e3a8a" stroke="#fbbf24" strokeWidth="1" />
-              <Circle cx="30" cy="44" r="10" fill="none" stroke="#f59e0b" strokeWidth="0.8" />
-              <Path d="M30 36 L30 52 M22 44 L38 44" stroke="#fde047" strokeWidth="1.5" />
-            </Svg>
           </View>
         )}
       </View>
