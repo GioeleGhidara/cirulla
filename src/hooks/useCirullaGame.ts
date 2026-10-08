@@ -63,9 +63,7 @@ export function useCirullaGame() {
   const [aiTargetCardIds, setAiTargetCardIds] = useState<string[]>([]);
   const [isShufflingOrDealing, setIsShufflingOrDealing] = useState<boolean>(false);
   const [dealingMessage, setDealingMessage] = useState<string | null>(null);
-  const [lastActionMessage, setLastActionMessage] = useState<string>(
-    'Benvenuto a Cirulla! Seleziona una carta in mano e poi clicca sulle carte a terra per prenderle.'
-  );
+  const [lastActionMessage, setLastActionMessage] = useState<string>('Tocca a te');
 
   const [choiceMoves, setChoiceMoves] = useState<CaptureMove[]>([]);
   const [isChoiceModalVisible, setIsChoiceModalVisible] = useState<boolean>(false);
@@ -216,22 +214,18 @@ export function useCirullaGame() {
     setIsShufflingOrDealing(true);
     setDealingMessage(
       currentDealer === 'player'
-        ? 'Mazziere: TU mescoli il mazzo e distribuisci le carte...'
-        : "Mazziere: L'AVVERSARIO mescola il mazzo e distribuisce le carte..."
+        ? 'Distribuzione carte...'
+        : "L'avversario distribuisce le carte..."
     );
     playSound('card', currentSettings.soundEnabled, currentSettings.hapticsEnabled);
     setTimeout(() => {
       setIsShufflingOrDealing(false);
       setDealingMessage(null);
-    }, 1600);
+    }, 1400);
 
     const playerStarts = currentDealer === 'ai';
     setIsPlayerTurn(playerStarts);
-    setLastActionMessage(
-      playerStarts
-        ? 'Nuova smazzata: tocca a te giocare! Seleziona una carta in mano.'
-        : "Nuova smazzata: l'avversario apre il gioco."
-    );
+    setLastActionMessage(playerStarts ? 'Tocca a te' : "Tocca all'avversario");
 
     checkAndApplyAccuse(pHand, aHand, currentSettings);
   }, [settings, checkAndApplyAccuse]);

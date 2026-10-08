@@ -566,23 +566,23 @@ const styles = StyleSheet.create({
   /* Banner Distribuzione */
   dealingOverlayBanner: {
     position: 'absolute',
-    top: 8,
+    top: 10,
     alignSelf: 'center',
     zIndex: 15,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(15, 23, 42, 0.92)',
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
     borderWidth: 1,
-    borderColor: '#d97706',
-    borderRadius: 20,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: theme.radii.full,
     paddingVertical: 5,
     paddingHorizontal: 14,
   },
   dealingOverlayText: {
-    color: '#fef08a',
-    fontSize: 11.5,
-    fontWeight: '700',
+    color: '#f8fafc',
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   /* Area Giocatore */

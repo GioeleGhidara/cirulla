@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { CardView } from './CardView';
 import { Card, DeckStyle } from '../types/card';
 import { theme } from '../theme/tokens';
-import { AppBadge } from './common/AppBadge';
 
 interface ScopaBannerProps {
   visible: boolean;
@@ -13,7 +11,7 @@ interface ScopaBannerProps {
 }
 
 export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 1 }) => {
-  const scale = useRef(new Animated.Value(0.3)).current;
+  const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -21,18 +19,18 @@ export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 
       Animated.parallel([
         Animated.spring(scale, {
           toValue: 1,
-          friction: 4,
-          tension: 40,
+          friction: 6,
+          tension: 50,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 200,
+          duration: 160,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
-      scale.setValue(0.3);
+      scale.setValue(0.85);
       opacity.setValue(0);
     }
   }, [visible]);
@@ -40,24 +38,24 @@ export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 
   if (!visible) return null;
 
   const isPlayer = who === 'player';
-  const title = isPlayer ? 'SCOPA' : "SCOPA DELL'AVVERSARIO";
-  const sub = count > 1 ? `+${count} Punti` : '+1 Punto';
+  const label = isPlayer
+    ? count > 1
+      ? `SCOPA (+${count})`
+      : 'SCOPA (+1)'
+    : count > 1
+    ? `SCOPA AVVERSARIO (+${count})`
+    : "SCOPA DELL'AVVERSARIO (+1)";
 
   return (
     <View style={styles.overlay} pointerEvents="none">
       <Animated.View
         style={[
-          styles.scopaBox,
-          isPlayer ? styles.playerScopaBg : styles.aiScopaBg,
+          styles.scopaPill,
+          isPlayer ? styles.playerScopaPill : styles.aiScopaPill,
           { transform: [{ scale }], opacity },
         ]}
       >
-        <View style={styles.scopaIconRow}>
-          <Ionicons name="sparkles" size={18} color="#ffffff" />
-          <Text style={styles.scopaTitle}>{title}</Text>
-          <Ionicons name="sparkles" size={18} color="#ffffff" />
-        </View>
-        <Text style={styles.scopaSub}>{sub}</Text>
+        <Text style={styles.scopaPillText}>{label}</Text>
       </Animated.View>
     </View>
   );
@@ -79,10 +77,9 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
   title,
   points,
   cards,
-  usedMatta,
   deckStyle,
 }) => {
-  const translateY = useRef(new Animated.Value(-50)).current;
+  const translateY = useRef(new Animated.Value(-16)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -90,57 +87,53 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
       Animated.parallel([
         Animated.spring(translateY, {
           toValue: 0,
-          friction: 6,
+          friction: 7,
+          tension: 45,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 250,
+          duration: 180,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
-      translateY.setValue(-50);
+      translateY.setValue(-16);
       opacity.setValue(0);
     }
   }, [visible]);
 
   if (!visible) return null;
 
-  const actor = who === 'player' ? 'Hai dichiarato:' : "L'avversario ha dichiarato:";
+  const actorLabel = who === 'player' ? 'Hai accusato' : "L'avversario accusa";
 
   return (
     <View style={styles.overlay} pointerEvents="none">
       <Animated.View
         style={[
-          styles.accusaBox,
+          styles.accusaPill,
           { transform: [{ translateY }], opacity },
         ]}
       >
-        <Text style={styles.accusaActor}>{actor}</Text>
-        <Text style={styles.accusaTitle}>{title}</Text>
-        <View style={styles.accusaBadgeWrap}>
-          <AppBadge label={`+${points} punti subito`} variant="gold" icon="flash" size="md" />
+        <View style={styles.accusaTopRow}>
+          <Text style={styles.accusaActorText}>{actorLabel}:</Text>
+          <Text style={styles.accusaTitleText}>{title}</Text>
+          <Text style={styles.accusaPtsText}>+{points} pt</Text>
         </View>
 
-        {usedMatta && (
-          <View style={styles.mattaRow}>
-            <Ionicons name="sparkles-outline" size={12} color={theme.colors.accentGoldLight} />
-            <Text style={styles.mattaUsedText}>Matta utilizzata nella combinazione</Text>
+        {cards && cards.length > 0 && (
+          <View style={styles.accusaCardsMiniRow}>
+            {cards.map((card, idx) => (
+              <CardView
+                key={`accusa-${card.id}-${idx}`}
+                card={card}
+                deckStyle={deckStyle}
+                width={38}
+                height={54}
+              />
+            ))}
           </View>
         )}
-
-        <View style={styles.accusaCardsRow}>
-          {cards.map((card, idx) => (
-            <CardView
-              key={`accusa-${card.id}-${idx}`}
-              card={card}
-              deckStyle={deckStyle}
-              width={54}
-              height={78}
-            />
-          ))}
-        </View>
       </Animated.View>
     </View>
   );
@@ -158,7 +151,7 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
   who,
   sum,
 }) => {
-  const scale = useRef(new Animated.Value(0.3)).current;
+  const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -166,18 +159,18 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
       Animated.parallel([
         Animated.spring(scale, {
           toValue: 1,
-          friction: 4,
-          tension: 40,
+          friction: 6,
+          tension: 50,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 200,
+          duration: 160,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
-      scale.setValue(0.3);
+      scale.setValue(0.85);
       opacity.setValue(0);
     }
   }, [visible]);
@@ -190,11 +183,11 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
     <View style={styles.overlay} pointerEvents="none">
       <Animated.View
         style={[
-          styles.monteBox,
+          styles.montePill,
           { transform: [{ scale }], opacity },
         ]}
       >
-        <Text style={styles.monteTitle}>{message}</Text>
+        <Text style={styles.montePillText}>{message}</Text>
       </Animated.View>
     </View>
   );
@@ -203,118 +196,95 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
-    top: 0,
+    top: 54,
     left: 0,
     right: 0,
-    bottom: 0,
     alignItems: 'center',
-    justifyContent: 'center',
     zIndex: 999,
   },
-  scopaBox: {
-    paddingVertical: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.xxl,
-    borderRadius: theme.radii.xl,
+  scopaPill: {
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: theme.radii.full,
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 20,
+    justifyContent: 'center',
     borderWidth: 1.5,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  playerScopaBg: {
-    backgroundColor: theme.colors.feltGreen,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+  playerScopaPill: {
+    backgroundColor: '#0f291e',
+    borderColor: '#10b981',
   },
-  aiScopaBg: {
-    backgroundColor: theme.colors.danger,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+  aiScopaPill: {
+    backgroundColor: '#1e1b2e',
+    borderColor: '#a855f7',
   },
-  scopaIconRow: {
-    flexDirection: 'row',
+  scopaPillText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#f8fafc',
+    letterSpacing: 0.8,
+  },
+  accusaPill: {
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+    borderWidth: 1.5,
+    borderColor: theme.colors.accentGold,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: theme.radii.lg,
     alignItems: 'center',
     gap: 8,
-  },
-  scopaTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#ffffff',
-    letterSpacing: 1.5,
-  },
-  scopaSub: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 4,
-  },
-  accusaBox: {
-    backgroundColor: theme.colors.surface,
-    paddingVertical: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.xl,
-    borderRadius: theme.radii.xl,
-    alignItems: 'center',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 20,
-    borderWidth: 1,
-    borderColor: theme.colors.cardBorder,
-    maxWidth: 380,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 12,
   },
-  accusaActor: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: theme.colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  accusaTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: theme.colors.textPrimary,
-    marginTop: 2,
-    marginBottom: theme.spacing.xs,
-    textAlign: 'center',
-  },
-  accusaBadgeWrap: {
-    marginVertical: 4,
-  },
-  mattaRow: {
+  accusaTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
+    gap: 6,
   },
-  mattaUsedText: {
-    fontSize: 11,
-    color: theme.colors.accentGoldLight,
+  accusaActorText: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
     fontWeight: '600',
   },
-  accusaCardsRow: {
+  accusaTitleText: {
+    fontSize: 14,
+    color: '#f8fafc',
+    fontWeight: '800',
+  },
+  accusaPtsText: {
+    fontSize: 14,
+    color: theme.colors.accentGoldLight,
+    fontWeight: '800',
+  },
+  accusaCardsMiniRow: {
     flexDirection: 'row',
     gap: 6,
-    marginTop: theme.spacing.md,
   },
-  monteBox: {
+  montePill: {
     backgroundColor: 'rgba(15, 23, 42, 0.95)',
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
     borderRadius: theme.radii.full,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: theme.colors.accentGold,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 20,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  monteTitle: {
-    fontSize: 18,
+  montePillText: {
+    fontSize: 15,
     fontWeight: '800',
     color: '#f8fafc',
     letterSpacing: 0.5,
