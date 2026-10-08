@@ -84,10 +84,10 @@ export const CIRULLA_GUIDE: GuideSection[] = [
       'Ad ogni turno cali una carta per raccogliere dal tavolo:\n\n1. Regola del 15 (Ciapachinze): prendi le carte a terra che, sommate alla tua carta in mano, fanno 15 (es. con un 6 in mano prendi 6 e 3 a terra, perché 6+6+3=15; con un 7 prendi un Jack da 8 perché 7+8=15).\n2. Presa d\'uguale: prendi una carta dello stesso valore (es. Donna 9 prende Donna 9, Jack 8 prende Jack 8).\n3. Presa a somma: prendi carte a terra la cui somma equivale al valore della tua carta (es. Donna da 9 prende un 4 e un 5; un 6 prende 2 e 4).\n\nSe più combinazioni sono possibili, sei sempre TU a scegliere cosa prendere!',
   },
   {
-    title: 'L\'Asso Pigliatutto',
+    title: 'L\'Asso Pigliatutto e la Regola del 15',
     badge: 'L\'ASSO',
     content:
-      'Se giochi un Asso e non ci sono altri Assi sul tavolo, "l\'Asso piglia tutto"! Prendi tutte le carte a terra e realizzi una Scopa (+1 punto).\n\nAttenzione: se sul tavolo c\'è già un Asso, sei obbligato a prendere solo l\'Asso a terra.',
+      'Se giochi un Asso e non ci sono altri Assi sul tavolo, "l\'Asso piglia tutto"! Prendi tutte le carte a terra e realizzi una Scopa (+1 punto).\n\nSe invece sul tavolo c\'è già un Asso, l\'Asso non piglia tutto il tavolo, ma NON sei obbligato a prendere solo l\'Asso a terra: se sul tavolo ci sono carte che sommano a 14, puoi applicare la Regola del 15 (1 + 14 = 15) e scegliere tu liberamente quale presa effettuare!',
     curiosity:
       'Se fai scopa con l\'ultima carta giocata dell\'intera smazzata da 40 carte, per regola tradizionale non viene conteggiato il punto di scopa.',
   },

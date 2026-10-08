@@ -215,33 +215,54 @@ function getAceCaptureMoves(
   tableCards: readonly Card[],
   isLastPlayOfDeck: boolean
 ): CaptureMove[] {
+  const moves: CaptureMove[] = [];
   const acesOnTable = tableCards.filter(isAce);
 
-  if (acesOnTable.length > 0) {
-    return acesOnTable.map((targetAce) => ({
-      cardPlayed: aceCard,
-      capturedCards: [targetAce],
-      isAceSweep: false,
-      is15Sum: false,
-      isDirectMatch: true,
-      isScopa: !isLastPlayOfDeck && tableCards.length === 1,
-    }));
-  }
-
-  if (tableCards.length > 0) {
-    return [
-      {
+  // Se non ci sono Assi sul tavolo, l'Asso piglia tutto il tavolo
+  if (acesOnTable.length === 0) {
+    if (tableCards.length > 0) {
+      moves.push({
         cardPlayed: aceCard,
         capturedCards: [...tableCards],
         isAceSweep: true,
         is15Sum: false,
         isDirectMatch: false,
         isScopa: !isLastPlayOfDeck,
-      },
-    ];
+      });
+    }
+    return moves;
   }
 
-  return [];
+  // Se c'è già un Asso a terra, l'Asso non "piglia tutto", ma il giocatore
+  // NON è obbligato a prendere solo l'Asso:
+  // 1. Presa d'uguale: può prendere l'Asso sul tavolo
+  for (const targetAce of acesOnTable) {
+    moves.push({
+      cardPlayed: aceCard,
+      capturedCards: [targetAce],
+      isAceSweep: false,
+      is15Sum: false,
+      isDirectMatch: true,
+      isScopa: !isLastPlayOfDeck && tableCards.length === 1,
+    });
+  }
+
+  // 2. Regola del 15 (Ciapachinze): con l'Asso (valore 1) può catturare combinazioni che sommano a 14 (1 + 14 = 15)
+  const neededSum = 15 - aceCard.value; // 14
+  const sum15Subsets = findSubsetsWithSum(tableCards, neededSum);
+  for (const subset of sum15Subsets) {
+    const isScopa = !isLastPlayOfDeck && subset.length === tableCards.length;
+    moves.push({
+      cardPlayed: aceCard,
+      capturedCards: subset,
+      isAceSweep: false,
+      is15Sum: true,
+      isDirectMatch: false,
+      isScopa,
+    });
+  }
+
+  return moves;
 }
 
 export function calculatePrimiera(cards: readonly Card[]): number {
