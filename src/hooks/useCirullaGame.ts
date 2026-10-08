@@ -428,6 +428,8 @@ export function useCirullaGame() {
     checkHandEnd,
   ]);
 
+  const [selectedMove, setSelectedMove] = useState<CaptureMove | null>(null);
+
   const availableMovesForSelected = useMemo(() => {
     if (!selectedCard) return [];
     const isLastPlay =
@@ -445,25 +447,84 @@ export function useCirullaGame() {
     } else {
       setSelectedCard(card);
       playSound('card', settings.soundEnabled, settings.hapticsEnabled);
+      const isLastPlay =
+        deck.length === 0 &&
+        handIndex === GAME_CONFIG.DEAL.TOTAL_HANDS_PER_DEAL &&
+        playerHand.length === 1 &&
+        aiHand.length === 0;
+      const moves = getCaptureMoves(card, tableCards, isLastPlay);
+      if (moves.length > 0) {
+        setSelectedMove(moves[0]);
+      } else {
+        setSelectedMove(null);
+      }
     }
-  }, [selectedCard, settings.soundEnabled, settings.hapticsEnabled]);
+  }, [
+    selectedCard,
+    settings.soundEnabled,
+    settings.hapticsEnabled,
+    deck.length,
+    handIndex,
+    playerHand.length,
+    aiHand.length,
+    tableCards,
+  ]);
+
+  const selectCaptureMove = useCallback((move: CaptureMove) => {
+    setSelectedMove(move);
+    playSound('card', settings.soundEnabled, settings.hapticsEnabled);
+  }, [settings.soundEnabled, settings.hapticsEnabled]);
+
+  const toggleTableCard = useCallback((tableCard: Card) => {
+    if (!selectedCard || availableMovesForSelected.length === 0) return;
+
+    // Find moves that contain this table card
+    const movesWithCard = availableMovesForSelected.filter((m) =>
+      m.capturedCards.some((c) => c.id === tableCard.id)
+    );
+
+    if (movesWithCard.length === 0) return;
+
+    // If current selected move doesn't have this card, switch to the first move that does
+    if (!selectedMove || !selectedMove.capturedCards.some((c) => c.id === tableCard.id)) {
+      setSelectedMove(movesWithCard[0]);
+      playSound('card', settings.soundEnabled, settings.hapticsEnabled);
+      return;
+    }
+
+    // If current selected move already has this card, cycle through other candidate moves
+    if (movesWithCard.length > 1) {
+      const currentIndex = movesWithCard.findIndex(
+        (m) => m === selectedMove
+      );
+      const nextIndex = (currentIndex + 1) % movesWithCard.length;
+      setSelectedMove(movesWithCard[nextIndex]);
+      playSound('card', settings.soundEnabled, settings.hapticsEnabled);
+    }
+  }, [selectedCard, availableMovesForSelected, selectedMove, settings.soundEnabled, settings.hapticsEnabled]);
 
   const confirmPlayCard = useCallback(() => {
     if (!selectedCard || !isPlayerTurn) return;
 
     if (availableMovesForSelected.length === 0) {
       executePlayerMove(selectedCard, undefined);
-    } else if (availableMovesForSelected.length === 1 || settings.autoSelectBestCapture) {
+    } else if (availableMovesForSelected.length === 1) {
       executePlayerMove(selectedCard, availableMovesForSelected[0]);
     } else {
-      setChoiceMoves(availableMovesForSelected);
-      setIsChoiceModalVisible(true);
+      // Multiple capture choices exist!
+      // If user has already actively chosen one move via table or chip:
+      if (selectedMove) {
+        executePlayerMove(selectedCard, selectedMove);
+      } else {
+        setChoiceMoves(availableMovesForSelected);
+        setIsChoiceModalVisible(true);
+      }
     }
   }, [
     selectedCard,
     isPlayerTurn,
     availableMovesForSelected,
-    settings.autoSelectBestCapture,
+    selectedMove,
     executePlayerMove,
   ]);
 
@@ -531,6 +592,7 @@ export function useCirullaGame() {
     aiScope,
     isPlayerTurn,
     selectedCard,
+    selectedMove,
     availableMovesForSelected,
     lastActionMessage,
     dealSummary,
@@ -542,6 +604,12 @@ export function useCirullaGame() {
     accusaBanner,
     monteBanner,
     selectPlayerCard,
+    selectCaptureMove,
+    toggleTableCard,
+    openChoiceModal: () => {
+      setChoiceMoves(availableMovesForSelected);
+      setIsChoiceModalVisible(true);
+    },
     confirmPlayCard,
     executeChosenCapture: (move: CaptureMove) => {
       setIsChoiceModalVisible(false);

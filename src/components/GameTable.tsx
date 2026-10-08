@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { CardView } from './CardView';
 import { Card, DeckStyle, CaptureMove } from '../types/card';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,11 @@ interface GameTableProps {
   aiHandRevealed: boolean;
   tableCards: Card[];
   selectedCard: Card | null;
+  selectedMove: CaptureMove | null;
   onSelectPlayerCard: (card: Card) => void;
+  onSelectCaptureMove: (move: CaptureMove) => void;
+  onToggleTableCard: (card: Card) => void;
+  onOpenChoiceModal: () => void;
   onConfirmPlayCard: () => void;
   availableMovesForSelected: CaptureMove[];
   isPlayerTurn: boolean;
@@ -27,7 +31,11 @@ export const GameTable: React.FC<GameTableProps> = ({
   aiHandRevealed,
   tableCards,
   selectedCard,
+  selectedMove,
   onSelectPlayerCard,
+  onSelectCaptureMove,
+  onToggleTableCard,
+  onOpenChoiceModal,
   onConfirmPlayCard,
   availableMovesForSelected,
   isPlayerTurn,
@@ -44,15 +52,20 @@ export const GameTable: React.FC<GameTableProps> = ({
   const smallCardWidth = isTablet ? 56 : 46;
   const smallCardHeight = isTablet ? 80 : 66;
 
-  // Highlight table cards that would be captured by selected card
-  const capturedCardIds = new Set<string>();
+  // All cards that participate in ANY valid capture move
+  const candidateCardIds = new Set<string>();
   if (selectedCard && availableMovesForSelected.length > 0) {
     for (const move of availableMovesForSelected) {
       for (const c of move.capturedCards) {
-        capturedCardIds.add(c.id);
+        candidateCardIds.add(c.id);
       }
     }
   }
+
+  // Cards currently targeted by the ACTIVE selected move
+  const activeSelectedCardIds = new Set<string>(
+    selectedMove ? selectedMove.capturedCards.map((c) => c.id) : []
+  );
 
   const lastPlayerCard = playerCaptured[playerCaptured.length - 1];
   const lastAICard = aiCaptured[aiCaptured.length - 1];
@@ -86,7 +99,6 @@ export const GameTable: React.FC<GameTableProps> = ({
 
       {/* Middle: The Table (Il Tavolo) */}
       <View style={styles.centerTable}>
-        {/* Table Felt Surface */}
         <View style={styles.feltSurface}>
           {/* Status Message Pill */}
           <View style={styles.actionPill}>
@@ -104,7 +116,9 @@ export const GameTable: React.FC<GameTableProps> = ({
           ) : (
             <View style={styles.tableCardsGrid}>
               {tableCards.map((card) => {
-                const isTarget = capturedCardIds.has(card.id);
+                const isSelectedInMove = activeSelectedCardIds.has(card.id);
+                const isCandidate = candidateCardIds.has(card.id);
+
                 return (
                   <CardView
                     key={`table-${card.id}`}
@@ -112,7 +126,14 @@ export const GameTable: React.FC<GameTableProps> = ({
                     deckStyle={deckStyle}
                     width={cardWidth}
                     height={cardHeight}
-                    isHighlighted={isTarget}
+                    isSelected={isSelectedInMove}
+                    isHighlighted={isSelectedInMove}
+                    isPlayable={isCandidate && !isSelectedInMove}
+                    onPress={
+                      isPlayerTurn && selectedCard && isCandidate
+                        ? () => onToggleTableCard(card)
+                        : undefined
+                    }
                     style={styles.tableCardItem}
                   />
                 );
@@ -170,26 +191,100 @@ export const GameTable: React.FC<GameTableProps> = ({
 
       {/* Bottom: Player Area */}
       <View style={styles.playerArea}>
+        {/* Quick capture selector pills if multiple moves are possible */}
+        {selectedCard && isPlayerTurn && availableMovesForSelected.length > 1 && (
+          <View style={styles.choicesBar}>
+            <View style={styles.choicesHeaderRow}>
+              <Text style={styles.choicesBarTitle}>Scegli cosa prendere:</Text>
+              <TouchableOpacity
+                onPress={onOpenChoiceModal}
+                style={styles.viewAllChoicesBtn}
+                accessibilityLabel="Apri dettagli combinazioni"
+              >
+                <Ionicons name="list" size={14} color="#38bdf8" />
+                <Text style={styles.viewAllChoicesText}>Tutte le opzioni</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.choicesRow}
+            >
+              {availableMovesForSelected.map((move, idx) => {
+                const isCurrent =
+                  selectedMove &&
+                  selectedMove.capturedCards.map((c) => c.id).sort().join(',') ===
+                    move.capturedCards.map((c) => c.id).sort().join(',');
+
+                const cardsText = move.capturedCards.map((c) => c.name).join(' + ');
+                let label = '';
+                if (move.isAceSweep) label = 'Asso spazza tutto';
+                else if (move.is15Sum) label = `${cardsText} (Somma 15)`;
+                else if (move.isDirectMatch) label = `${cardsText} (Uguale)`;
+                else label = `${cardsText} (Somma ${move.cardPlayed.value})`;
+
+                return (
+                  <TouchableOpacity
+                    key={`quick-choice-${idx}`}
+                    style={[
+                      styles.choicePill,
+                      isCurrent && styles.choicePillActive,
+                      move.isScopa && styles.choicePillScopa,
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={() => onSelectCaptureMove(move)}
+                  >
+                    <Ionicons
+                      name={isCurrent ? 'radio-button-on' : 'radio-button-off'}
+                      size={14}
+                      color={isCurrent ? '#ffffff' : '#94a3b8'}
+                    />
+                    <Text
+                      style={[
+                        styles.choicePillText,
+                        isCurrent && styles.choicePillTextActive,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                    {move.isScopa && (
+                      <View style={styles.scopaPillBadge}>
+                        <Text style={styles.scopaPillText}>★ SCOPA</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Play card confirmation action bar */}
         {selectedCard && isPlayerTurn && (
           <View style={styles.playActionWrapper}>
             <TouchableOpacity
-              style={styles.confirmPlayBtn}
+              style={[
+                styles.confirmPlayBtn,
+                availableMovesForSelected.length > 1 && styles.confirmPlayMultiBtn,
+              ]}
               activeOpacity={0.8}
               onPress={onConfirmPlayCard}
             >
               <Ionicons
                 name={
-                  availableMovesForSelected.length > 0
+                  selectedMove || availableMovesForSelected.length > 0
                     ? 'flash-outline'
                     : 'arrow-up-circle-outline'
                 }
                 size={18}
                 color="#ffffff"
               />
-              <Text style={styles.confirmPlayText}>
-                {availableMovesForSelected.length > 0
-                  ? `GIOCA E PRENDI (${selectedCard.name})`
+              <Text style={styles.confirmPlayText} numberOfLines={1}>
+                {selectedMove
+                  ? `CONFERMA: PRENDI ${selectedMove.capturedCards.map((c) => c.name).join(' e ')}`
+                  : availableMovesForSelected.length > 0
+                  ? `SCEGLI PRESA CON (${selectedCard.name})`
                   : `CALA A TERRA (${selectedCard.name})`}
               </Text>
             </TouchableOpacity>
@@ -367,10 +462,83 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 4,
   },
+  choicesBar: {
+    width: '100%',
+    backgroundColor: '#0f172a',
+    borderRadius: 12,
+    padding: 8,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#38bdf8',
+  },
+  choicesHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
+  choicesBarTitle: {
+    color: '#38bdf8',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  viewAllChoicesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  viewAllChoicesText: {
+    color: '#38bdf8',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  choicesRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  choicePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#1e293b',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#475569',
+  },
+  choicePillActive: {
+    backgroundColor: '#0284c7',
+    borderColor: '#38bdf8',
+  },
+  choicePillScopa: {
+    borderColor: '#eab308',
+  },
+  choicePillText: {
+    color: '#94a3b8',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  choicePillTextActive: {
+    color: '#ffffff',
+    fontWeight: '800',
+  },
+  scopaPillBadge: {
+    backgroundColor: '#eab308',
+    borderRadius: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
+  scopaPillText: {
+    color: '#0f172a',
+    fontSize: 8.5,
+    fontWeight: '900',
+  },
   playActionWrapper: {
     marginBottom: 6,
     width: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   confirmPlayBtn: {
     flexDirection: 'row',
@@ -379,13 +547,17 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: '#0284c7',
     borderRadius: 12,
-    paddingVertical: 9,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     shadowColor: '#0284c7',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.4,
     shadowRadius: 5,
     elevation: 6,
+  },
+  confirmPlayMultiBtn: {
+    backgroundColor: '#059669',
+    shadowColor: '#059669',
   },
   confirmPlayText: {
     color: '#ffffff',

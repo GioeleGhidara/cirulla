@@ -33,6 +33,7 @@ export const CaptureChoiceModal: React.FC<CaptureChoiceModalProps> = ({
               if (move.isAceSweep) reason = 'Asso Pigliatutto (Tutto il tavolo)';
               else if (move.is15Sum) reason = `Regola del 15 (${move.cardPlayed.value} + ${15 - move.cardPlayed.value} = 15)`;
               else if (move.isDirectMatch) reason = `Presa d'uguale (${move.cardPlayed.name})`;
+              else reason = `Presa per somma pari a ${move.cardPlayed.value}`;
 
               return (
                 <TouchableOpacity

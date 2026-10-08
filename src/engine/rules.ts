@@ -181,6 +181,28 @@ export function getCaptureMoves(
     }
   }
 
+  // 3. Multi-card sum matching card rank (e.g. 6 takes 2 + 4)
+  const sumRankSubsets = findSubsetsWithSum(tableCards, cardPlayed.value);
+  for (const subset of sumRankSubsets) {
+    if (subset.length > 1) {
+      const subsetIds = subset.map((c) => c.id).sort().join(',');
+      const alreadyIncluded = moves.some(
+        (m) => m.capturedCards.map((c) => c.id).sort().join(',') === subsetIds
+      );
+      if (!alreadyIncluded) {
+        const isScopa = !isLastPlayOfDeck && subset.length === tableCards.length;
+        moves.push({
+          cardPlayed,
+          capturedCards: subset,
+          isAceSweep: false,
+          is15Sum: false,
+          isDirectMatch: false,
+          isScopa,
+        });
+      }
+    }
+  }
+
   return moves;
 }
 

@@ -40,7 +40,7 @@ export default function App() {
         currentHandIndex={game.handIndex}
         aiDifficulty={game.settings.aiDifficulty}
         onOpenSettings={() => setIsSettingsVisible(true)}
-        onOpenRules={() => setIsRulesVisible(false || true)}
+        onOpenRules={() => setIsRulesVisible(true)}
         onOpenStats={() => setIsStatsVisible(true)}
       />
 
@@ -51,7 +51,11 @@ export default function App() {
         aiHandRevealed={game.aiHandRevealed}
         tableCards={game.tableCards}
         selectedCard={game.selectedCard}
+        selectedMove={game.selectedMove}
         onSelectPlayerCard={game.selectPlayerCard}
+        onSelectCaptureMove={game.selectCaptureMove}
+        onToggleTableCard={game.toggleTableCard}
+        onOpenChoiceModal={game.openChoiceModal}
         onConfirmPlayCard={game.confirmPlayCard}
         availableMovesForSelected={game.availableMovesForSelected}
         isPlayerTurn={game.isPlayerTurn}
