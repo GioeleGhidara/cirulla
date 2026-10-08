@@ -16,7 +16,7 @@ export const AVAILABLE_AVATARS: readonly PlayerAvatar[] = [
   {
     id: 'lanterna',
     name: 'La Lanterna',
-    role: 'Guardiano del Porto',
+    role: 'Guardiana del Porto',
     icon: 'flame-outline',
     color: '#f59e0b',
     description: 'Illumina il tavolo con saggezza e non perde mai il conto del 15.',
@@ -48,7 +48,7 @@ export const AVAILABLE_AVATARS: readonly PlayerAvatar[] = [
   {
     id: 'oste',
     name: 'Oste dei Caruggi',
-    role: 'Re dell’Osteria Storica',
+    role: 'Regina dell’Osteria Storica',
     icon: 'wine-outline',
     color: '#8b5cf6',
     description: 'Distribuisce le smazzate tra focaccia calda e mugugno amichevole.',
