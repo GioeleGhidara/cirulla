@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { CardView } from './CardView';
 import { Card, DeckStyle } from '../types/card';
 import { theme } from '../theme/tokens';
+
+const isNativeDriver = Platform.OS !== 'web';
 
 interface ScopaBannerProps {
   visible: boolean;
@@ -21,12 +23,12 @@ export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 
           toValue: 1,
           friction: 6,
           tension: 50,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.timing(opacity, {
           toValue: 1,
           duration: 160,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
       ]).start();
     } else {
@@ -47,7 +49,7 @@ export const ScopaBanner: React.FC<ScopaBannerProps> = ({ visible, who, count = 
     : "SCOPA DELL'AVVERSARIO (+1)";
 
   return (
-    <View style={styles.overlay} pointerEvents="none">
+    <View style={styles.overlay}>
       <Animated.View
         style={[
           styles.scopaPill,
@@ -89,12 +91,12 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
           toValue: 0,
           friction: 7,
           tension: 45,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.timing(opacity, {
           toValue: 1,
           duration: 180,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
       ]).start();
     } else {
@@ -108,7 +110,7 @@ export const AccusaBanner: React.FC<AccusaBannerProps> = ({
   const actorLabel = who === 'player' ? 'Hai accusato' : "L'avversario accusa";
 
   return (
-    <View style={styles.overlay} pointerEvents="none">
+    <View style={styles.overlay}>
       <Animated.View
         style={[
           styles.accusaPill,
@@ -161,12 +163,12 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
           toValue: 1,
           friction: 6,
           tension: 50,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.timing(opacity, {
           toValue: 1,
           duration: 160,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
       ]).start();
     } else {
@@ -180,7 +182,7 @@ export const MonteBanner: React.FC<MonteBannerProps> = ({
   const message = who === 'player' ? `Hai fatto ${sum}` : `L'avversario ha fatto ${sum}`;
 
   return (
-    <View style={styles.overlay} pointerEvents="none">
+    <View style={styles.overlay}>
       <Animated.View
         style={[
           styles.montePill,
@@ -201,6 +203,7 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     zIndex: 999,
+    pointerEvents: 'none',
   },
   scopaPill: {
     paddingVertical: 10,
@@ -209,10 +212,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.4)',
     elevation: 10,
   },
   playerScopaPill: {
@@ -238,10 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radii.lg,
     alignItems: 'center',
     gap: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
+    boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.45)',
     elevation: 12,
   },
   accusaTopRow: {
@@ -277,10 +274,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: theme.colors.accentGold,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.4)',
     elevation: 10,
   },
   montePillText: {

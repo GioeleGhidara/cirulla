@@ -280,10 +280,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.3)',
     elevation: 8,
   },
   playerSection: {

@@ -361,10 +361,7 @@ const styles = StyleSheet.create({
     borderColor: '#cbd5e1',
     backgroundColor: '#fffdfa',
     position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 3,
+    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.18)',
     elevation: 3,
     overflow: 'hidden',
     justifyContent: 'space-between',
@@ -389,10 +386,7 @@ const styles = StyleSheet.create({
   cardSelected: {
     borderColor: '#eab308',
     borderWidth: 2.5,
-    shadowColor: '#eab308',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 7,
+    boxShadow: '0px 4px 7px rgba(234, 179, 8, 0.5)',
     elevation: 8,
   },
   cardPlayable: {

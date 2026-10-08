@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
+  Platform,
 } from 'react-native';
 import { CardView } from './CardView';
 import { Card, DeckStyle, CardGraphicStyle, DeckSkinId, PlayerSide } from '../types/card';
 import { Ionicons } from '@expo/vector-icons';
 import { AppBadge } from './common/AppBadge';
 import { theme } from '../theme/tokens';
+
+const isNativeDriver = Platform.OS !== 'web';
 
 interface GameTableProps {
   deckStyle: DeckStyle;
@@ -138,18 +141,18 @@ export const GameTable: React.FC<GameTableProps> = ({
           toValue: 20,
           duration: 360,
           easing: Easing.out(Easing.back(1.1)),
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.timing(aiAnimOpacity, {
           toValue: 1,
           duration: 220,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.spring(aiAnimScale, {
           toValue: 1.05,
           friction: 6,
           tension: 40,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
       ]).start();
     }
@@ -292,9 +295,9 @@ export const GameTable: React.FC<GameTableProps> = ({
                 {
                   transform: [{ translateY: aiAnimY }, { scale: aiAnimScale }],
                   opacity: aiAnimOpacity,
+                  pointerEvents: 'none',
                 },
               ]}
-              pointerEvents="none"
             >
               <CardView
                 card={lastPlayedCardByAI}
@@ -451,10 +454,7 @@ const styles = StyleSheet.create({
   },
   aiCardWrapper: {
     marginHorizontal: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 3,
+    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.35)',
     elevation: 3,
   },
   aiPileSlot: {
@@ -472,10 +472,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#14532d',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
+    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.5)',
     elevation: 8,
   },
   feltSurface: {
@@ -515,19 +512,13 @@ const styles = StyleSheet.create({
     borderColor: '#eab308',
     borderWidth: 3,
     transform: [{ translateY: -6 }],
-    shadowColor: '#eab308',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(234, 179, 8, 0.6)',
     elevation: 10,
   },
   tableCardTargetedByAI: {
     borderColor: '#ef4444',
     borderWidth: 3,
-    shadowColor: '#ef4444',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(239, 68, 68, 0.7)',
     elevation: 10,
   },
   userSelectedBadge: {
@@ -548,10 +539,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     zIndex: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
+    boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.6)',
     elevation: 12,
   },
   aiPlayedCardGlow: {
@@ -632,10 +620,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 20,
     minHeight: 38,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)',
     elevation: 4,
   },
   actionBtnCapture: {

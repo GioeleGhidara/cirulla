@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Card,
   CaptureMove,
@@ -240,7 +240,12 @@ export function useCirullaGame() {
     startNewDeal(initialDealer, cfg);
   }, [settings, startNewDeal]);
 
+  const hasInitializedRef = useRef(false);
+
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
     async function init() {
       const loadedSettings = await loadSettings();
       const loadedStats = await loadStats();
@@ -270,7 +275,7 @@ export function useCirullaGame() {
       }
     }
     init();
-  }, [startNewMatch]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const finalizeDeal = useCallback(() => {
     let finalPlayerCaptured = [...playerCaptured];

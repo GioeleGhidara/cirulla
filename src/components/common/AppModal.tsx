@@ -139,10 +139,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 18,
+    boxShadow: '0px 12px 18px rgba(0, 0, 0, 0.5)',
     elevation: 24,
   },
   header: {
