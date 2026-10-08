@@ -1,11 +1,18 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Pressable } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  Animated,
+  Easing,
+} from 'react-native';
 import { CardView } from './CardView';
 import { Card, DeckStyle, CardGraphicStyle, DeckSkinId, PlayerSide } from '../types/card';
 import { Ionicons } from '@expo/vector-icons';
 import { AppBadge } from './common/AppBadge';
 import { theme } from '../theme/tokens';
-import { getSkinCardBack } from '../assets/deckSkinsRegistry';
 
 interface GameTableProps {
   deckStyle: DeckStyle;
@@ -30,8 +37,45 @@ interface GameTableProps {
   isPlayerTurn: boolean;
   playerCaptured: Card[];
   aiCaptured: Card[];
-  lastActionMessage: string;
+  lastActionMessage?: string;
 }
+
+/**
+ * Pila di carte fisiche (dorso rivolto verso l'alto con effetto spessore 3D)
+ * Nessuna etichetta testuale invadente.
+ */
+const PhysicalCardPile: React.FC<{
+  cards: Card[];
+  deckStyle: DeckStyle;
+  deckSkinId?: DeckSkinId;
+  width: number;
+  height: number;
+}> = ({ cards, deckStyle, deckSkinId, width, height }) => {
+  if (cards.length === 0) {
+    return <View style={[styles.emptyPile, { width, height }]} />;
+  }
+
+  const topCard = cards[cards.length - 1];
+
+  return (
+    <View style={[styles.pileStack, { width, height }]}>
+      {cards.length > 6 && (
+        <View style={[styles.pileLayer2, { width, height }]} />
+      )}
+      {cards.length > 2 && (
+        <View style={[styles.pileLayer1, { width, height }]} />
+      )}
+      <CardView
+        card={topCard}
+        faceDown={true}
+        deckStyle={deckStyle}
+        deckSkinId={deckSkinId}
+        width={width}
+        height={height}
+      />
+    </View>
+  );
+};
 
 export const GameTable: React.FC<GameTableProps> = ({
   deckStyle,
@@ -56,100 +100,147 @@ export const GameTable: React.FC<GameTableProps> = ({
   isPlayerTurn,
   playerCaptured,
   aiCaptured,
-  lastActionMessage,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const isTablet = screenWidth > 600;
 
-  // Responsive card dimensions
-  const cardWidth = isTablet ? 86 : 70;
-  const cardHeight = isTablet ? 124 : 100;
-  const smallCardWidth = isTablet ? 54 : 44;
-  const smallCardHeight = isTablet ? 78 : 64;
-
-  const lastPlayerCard = playerCaptured[playerCaptured.length - 1];
-  const lastAICard = aiCaptured[aiCaptured.length - 1];
+  // Dimensioni responsive per carte autentiche
+  const cardWidth = isTablet ? 84 : 68;
+  const cardHeight = isTablet ? 122 : 98;
+  const smallCardWidth = isTablet ? 54 : 42;
+  const smallCardHeight = isTablet ? 78 : 60;
+  const opponentCardWidth = isTablet ? 60 : 48;
+  const opponentCardHeight = isTablet ? 86 : 68;
 
   const hasSelectedTableCards = selectedTableCardIds.length > 0;
   const targetIdsSet = new Set(aiTargetCardIds);
   const selectedIdsSet = new Set(selectedTableCardIds);
 
+  // Animazione giocata avversario: scivola dalla mano in alto verso il tavolo
+  const aiAnimY = useRef(new Animated.Value(-80)).current;
+  const aiAnimOpacity = useRef(new Animated.Value(0)).current;
+  const aiAnimScale = useRef(new Animated.Value(0.75)).current;
+
+  useEffect(() => {
+    if (lastPlayedCardByAI) {
+      aiAnimY.setValue(-70);
+      aiAnimOpacity.setValue(0);
+      aiAnimScale.setValue(0.75);
+
+      Animated.parallel([
+        Animated.timing(aiAnimY, {
+          toValue: 20,
+          duration: 360,
+          easing: Easing.out(Easing.back(1.1)),
+          useNativeDriver: true,
+        }),
+        Animated.timing(aiAnimOpacity, {
+          toValue: 1,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+        Animated.spring(aiAnimScale, {
+          toValue: 1.05,
+          friction: 6,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [lastPlayedCardByAI]);
+
   return (
     <View style={styles.tableFelt}>
-      {/* Top: AI Opponent Area */}
+      {/* 1. In Alto: Area Avversario (seduto di fronte a noi) */}
       <View style={styles.aiArea}>
-        <View style={styles.aiHeader}>
+        {/* Sinistra: Dettaglio discreto Mazziere / Avatar */}
+        <View style={styles.aiInfoSlot}>
           <View style={styles.avatarMini}>
-            <Ionicons name="hardware-chip" size={14} color="#f87171" />
+            <Ionicons name="hardware-chip" size={13} color="#f87171" />
           </View>
-          <Text style={styles.aiNameText}>Avversario</Text>
-          <Text style={styles.cardsInHandCount}>({aiHand.length} carte)</Text>
           {dealer === 'ai' && (
             <AppBadge label="Mazziere" variant="gold" size="sm" />
           )}
         </View>
 
-        <View style={styles.handRow}>
-          {aiHand.map((card, idx) => (
-            <CardView
-              key={`ai-hand-${card.id}-${idx}`}
-              card={card}
-              faceDown={!aiHandRevealed}
-              deckStyle={deckStyle}
-              graphicStyle={graphicStyle}
-              deckSkinId={deckSkinId}
-              width={smallCardWidth}
-              height={smallCardHeight}
-              style={{ marginHorizontal: -4 }}
-            />
-          ))}
+        {/* Centro: Mano dell'Avversario vista dal dorso (diminuisce quando gioca) */}
+        <View style={styles.aiHandCenter}>
+          {aiHand.map((card, idx) => {
+            const rotDeg = (idx - (aiHand.length - 1) / 2) * 5;
+            const offsetY = Math.abs(idx - (aiHand.length - 1) / 2) * 2;
+
+            return (
+              <View
+                key={`ai-hand-${card.id}-${idx}`}
+                style={[
+                  styles.aiCardWrapper,
+                  {
+                    transform: [{ rotate: `${rotDeg}deg` }, { translateY: offsetY }],
+                  },
+                ]}
+              >
+                <CardView
+                  card={card}
+                  faceDown={!aiHandRevealed}
+                  deckStyle={deckStyle}
+                  graphicStyle={graphicStyle}
+                  deckSkinId={deckSkinId}
+                  width={opponentCardWidth}
+                  height={opponentCardHeight}
+                />
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Destra: Pila delle prese dell'Avversario (vicino a lui, senza etichette) */}
+        <View style={styles.aiPileSlot}>
+          <PhysicalCardPile
+            cards={aiCaptured}
+            deckStyle={deckStyle}
+            deckSkinId={deckSkinId}
+            width={smallCardWidth}
+            height={smallCardHeight}
+          />
         </View>
       </View>
 
-      {/* Middle: The Playing Table (Il Tavolo da Gioco) */}
+      {/* 2. Al Centro: Tavolo da Gioco in Panno Verde Feltro */}
       <View style={styles.centerTable}>
         <View style={styles.feltSurface}>
-          {/* Status Message Pill */}
-          <View style={styles.actionPill}>
-            <Text style={styles.actionPillText} numberOfLines={1}>
-              {lastActionMessage}
-            </Text>
-          </View>
-
-          {/* Shuffle / Dealing Banner */}
+          {/* Banner discreto di mescolamento/distribuzione (solo quando avviene) */}
           {isShufflingOrDealing && dealingMessage && (
             <View style={styles.dealingOverlayBanner}>
-              <Ionicons name="shuffle" size={18} color={theme.colors.accentGoldLight} />
+              <Ionicons name="shuffle" size={16} color={theme.colors.accentGoldLight} />
               <Text style={styles.dealingOverlayText}>{dealingMessage}</Text>
             </View>
           )}
 
-          {/* Last Played Card by AI Floating Slot */}
-          {lastPlayedCardByAI && (
-            <View style={styles.aiPlayedContainer}>
-              <View style={styles.aiPlayedHeader}>
-                <Ionicons name="eye" size={12} color="#fca5a5" />
-                <Text style={styles.aiPlayedHeaderText}>L'Avversario gioca:</Text>
-              </View>
-              <CardView
-                card={lastPlayedCardByAI}
-                deckStyle={deckStyle}
-                graphicStyle={graphicStyle}
-                deckSkinId={deckSkinId}
-                width={cardWidth}
-                height={cardHeight}
-                style={styles.aiPlayedCardGlow}
-              />
+          {/* Mazzo (Tallone) sul tavolo: posizionato sul feltro verde a sinistra */}
+          <View style={styles.tableCenterRow}>
+            <View style={styles.talloneSlot}>
+              {deckCount > 0 ? (
+                <View style={[styles.pileStack, { width: smallCardWidth, height: smallCardHeight }]}>
+                  {deckCount > 10 && (
+                    <View style={[styles.pileLayer2, { width: smallCardWidth, height: smallCardHeight }]} />
+                  )}
+                  {deckCount > 4 && (
+                    <View style={[styles.pileLayer1, { width: smallCardWidth, height: smallCardHeight }]} />
+                  )}
+                  <CardView
+                    faceDown={true}
+                    deckStyle={deckStyle}
+                    deckSkinId={deckSkinId}
+                    width={smallCardWidth}
+                    height={smallCardHeight}
+                  />
+                </View>
+              ) : (
+                <View style={[styles.emptyPile, { width: smallCardWidth, height: smallCardHeight }]} />
+              )}
             </View>
-          )}
 
-          {/* Table Cards Grid */}
-          {tableCards.length === 0 ? (
-            <View style={styles.emptyTablePlaceholder}>
-              <Text style={styles.emptyTableText}>Tavolo Vuoto</Text>
-              <Text style={styles.emptyTableSub}>Nessuna carta a terra</Text>
-            </View>
-          ) : (
+            {/* Carte sul Tavolo (posate a terra) */}
             <View style={styles.tableCardsGrid}>
               {tableCards.map((card) => {
                 const isSelectedByUser = selectedIdsSet.has(card.id);
@@ -176,181 +267,119 @@ export const GameTable: React.FC<GameTableProps> = ({
                         isTargetedByAI && styles.tableCardTargetedByAI,
                       ]}
                     />
-                    {isTargetedByAI && (
-                      <View style={styles.aiTargetBadge}>
-                        <Text style={styles.aiTargetBadgeText}>PRESA</Text>
-                      </View>
-                    )}
                     {isSelectedByUser && (
                       <View style={styles.userSelectedBadge}>
-                        <Ionicons name="checkmark" size={10} color="#0f172a" />
+                        <Ionicons name="checkmark" size={11} color="#0f172a" />
                       </View>
                     )}
                   </View>
                 );
               })}
             </View>
-          )}
-
-          {/* Side Decks Row: AI Pile, Draw Deck (Tallone), and Player Pile */}
-          <View style={styles.decksSideRow}>
-            {/* AI captured pile */}
-            <View style={styles.pileContainer}>
-              <Text style={styles.pileLabel}>Prese Avv.</Text>
-              {aiCaptured.length > 0 ? (
-                <CardView
-                  card={lastAICard}
-                  faceDown={true}
-                  deckStyle={deckStyle}
-                  deckSkinId={deckSkinId}
-                  width={smallCardWidth}
-                  height={smallCardHeight}
-                />
-              ) : (
-                <View
-                  style={[
-                    styles.emptyPile,
-                    { width: smallCardWidth, height: smallCardHeight },
-                  ]}
-                />
-              )}
-              <Text style={styles.pileCount}>{aiCaptured.length}</Text>
-            </View>
-
-            {/* DRAW DECK (IL MAZZO SUL TAVOLO) */}
-            <View style={styles.drawDeckContainer}>
-              <Text style={styles.drawDeckLabel}>Mazzo</Text>
-              {deckCount > 0 ? (
-                <View style={styles.drawDeckStack}>
-                  {/* Visual 3D Stack depth */}
-                  <View style={[styles.deckStackLayer2, { width: smallCardWidth, height: smallCardHeight }]} />
-                  <View style={[styles.deckStackLayer1, { width: smallCardWidth, height: smallCardHeight }]} />
-                  <CardView
-                    faceDown={true}
-                    deckStyle={deckStyle}
-                    deckSkinId={deckSkinId}
-                    width={smallCardWidth}
-                    height={smallCardHeight}
-                  />
-                </View>
-              ) : (
-                <View
-                  style={[
-                    styles.emptyPile,
-                    { width: smallCardWidth, height: smallCardHeight },
-                  ]}
-                >
-                  <Text style={styles.emptyDeckIcon}>Esaurito</Text>
-                </View>
-              )}
-              <Text style={styles.drawDeckCount}>{deckCount} carte</Text>
-            </View>
-
-            {/* Player captured pile */}
-            <View style={styles.pileContainer}>
-              <Text style={styles.pileLabel}>Tue Prese</Text>
-              {playerCaptured.length > 0 ? (
-                <CardView
-                  card={lastPlayerCard}
-                  deckStyle={deckStyle}
-                  graphicStyle={graphicStyle}
-                  deckSkinId={deckSkinId}
-                  width={smallCardWidth}
-                  height={smallCardHeight}
-                />
-              ) : (
-                <View
-                  style={[
-                    styles.emptyPile,
-                    { width: smallCardWidth, height: smallCardHeight },
-                  ]}
-                />
-              )}
-              <Text style={styles.pileCount}>{playerCaptured.length}</Text>
-            </View>
           </View>
+
+          {/* Carta giocata dall'avversario animata che atterra sul tavolo */}
+          {lastPlayedCardByAI && (
+            <Animated.View
+              style={[
+                styles.aiAnimatedSlot,
+                {
+                  transform: [{ translateY: aiAnimY }, { scale: aiAnimScale }],
+                  opacity: aiAnimOpacity,
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <CardView
+                card={lastPlayedCardByAI}
+                deckStyle={deckStyle}
+                graphicStyle={graphicStyle}
+                deckSkinId={deckSkinId}
+                width={cardWidth}
+                height={cardHeight}
+                style={styles.aiPlayedCardGlow}
+              />
+            </Animated.View>
+          )}
         </View>
       </View>
 
-      {/* Bottom: Player Area */}
+      {/* 3. In Basso: Area Giocatore (Tu) */}
       <View style={styles.playerArea}>
-        {/* Dynamic Manual Action Bar (when card in hand is chosen) */}
+        {/* Barra di azione minimalista quando una carta è selezionata */}
         {selectedCard && isPlayerTurn && (
           <View style={styles.actionToolbar}>
             <TouchableOpacity
               style={[
-                styles.mainActionBtn,
-                hasSelectedTableCards ? styles.captureActionBtn : styles.discardActionBtn,
+                styles.actionBtn,
+                hasSelectedTableCards ? styles.actionBtnCapture : styles.actionBtnPlay,
               ]}
               activeOpacity={0.85}
               onPress={onConfirmPlayCard}
-              accessibilityRole="button"
-              accessibilityLabel={
-                hasSelectedTableCards
-                  ? `Conferma presa di ${selectedTableCardIds.length} carte a terra`
-                  : `Cala ${selectedCard.name} sul tavolo`
-              }
             >
               <Ionicons
-                name={hasSelectedTableCards ? 'checkmark-circle' : 'arrow-down-circle'}
+                name={hasSelectedTableCards ? 'checkmark' : 'arrow-up'}
                 size={18}
                 color="#ffffff"
               />
-              <Text style={styles.mainActionBtnText}>
-                {hasSelectedTableCards
-                  ? `PRENDI (${selectedTableCardIds.length} CARTE A TERRA)`
-                  : `CALA A TERRA (${selectedCard.name})`}
+              <Text style={styles.actionBtnText}>
+                {hasSelectedTableCards ? 'Prendi' : 'Gioca'}
               </Text>
             </TouchableOpacity>
 
             {hasSelectedTableCards && (
               <TouchableOpacity
-                style={styles.cancelSelectionBtn}
+                style={styles.actionBtnCancel}
                 activeOpacity={0.8}
                 onPress={onClearTableSelection}
-                accessibilityRole="button"
-                accessibilityLabel="Deseleziona carte a terra"
               >
-                <Ionicons name="close-circle-outline" size={16} color="#94a3b8" />
-                <Text style={styles.cancelSelectionText}>Annulla</Text>
+                <Ionicons name="close" size={18} color="#94a3b8" />
               </TouchableOpacity>
             )}
           </View>
         )}
 
-        {/* Player Section Header */}
-        <View style={styles.playerHeader}>
-          <Text style={styles.playerSectionTitle}>Le Tue Carte</Text>
-          {isPlayerTurn ? (
-            <AppBadge label="TUO TURNO" variant="success" icon="play" size="sm" />
-          ) : (
-            <AppBadge label="Turno avversario..." variant="default" size="sm" />
-          )}
-          {dealer === 'player' && (
-            <AppBadge label="Sei Mazziere" variant="gold" size="sm" />
-          )}
-        </View>
+        {/* Fila Mano Giocatore + Pila Prese accanto */}
+        <View style={styles.playerBottomRow}>
+          {/* Spazio informativo sinistro discreto (es. Mazziere) */}
+          <View style={styles.playerInfoSlot}>
+            {dealer === 'player' && (
+              <AppBadge label="Mazziere" variant="gold" size="sm" />
+            )}
+          </View>
 
-        {/* Player Hand Cards */}
-        <View style={styles.playerHandRow}>
-          {playerHand.map((card) => {
-            const isSelected = selectedCard?.id === card.id;
+          {/* Mano del Giocatore (carte grandi ben visibili) */}
+          <View style={styles.playerHandRow}>
+            {playerHand.map((card) => {
+              const isSelected = selectedCard?.id === card.id;
 
-            return (
-              <View key={`player-hand-${card.id}`} style={styles.playerHandCard}>
-                <CardView
-                  card={card}
-                  deckStyle={deckStyle}
-                  graphicStyle={graphicStyle}
-                  deckSkinId={deckSkinId}
-                  width={cardWidth}
-                  height={cardHeight}
-                  isSelected={isSelected}
-                  onPress={isPlayerTurn ? () => onSelectPlayerCard(card) : undefined}
-                />
-              </View>
-            );
-          })}
+              return (
+                <View key={`player-hand-${card.id}`} style={styles.playerHandCard}>
+                  <CardView
+                    card={card}
+                    deckStyle={deckStyle}
+                    graphicStyle={graphicStyle}
+                    deckSkinId={deckSkinId}
+                    width={cardWidth}
+                    height={cardHeight}
+                    isSelected={isSelected}
+                    onPress={isPlayerTurn ? () => onSelectPlayerCard(card) : undefined}
+                  />
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Destra: Pila delle tue prese (vicino a te, senza etichette) */}
+          <View style={styles.playerPileSlot}>
+            <PhysicalCardPile
+              cards={playerCaptured}
+              deckStyle={deckStyle}
+              deckSkinId={deckSkinId}
+              width={smallCardWidth}
+              height={smallCardHeight}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -360,51 +389,62 @@ export const GameTable: React.FC<GameTableProps> = ({
 const styles = StyleSheet.create({
   tableFelt: {
     flex: 1,
-    backgroundColor: '#090e17',
+    backgroundColor: '#070b12',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
+
+  /* Area Avversario */
   aiArea: {
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    marginBottom: 4,
-  },
-  aiHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    minHeight: 76,
+  },
+  aiInfoSlot: {
+    width: 60,
+    alignItems: 'flex-start',
+    gap: 4,
   },
   avatarMini: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#334155',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: '#334155',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  aiNameText: {
-    color: '#cbd5e1',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  cardsInHandCount: {
-    color: '#64748b',
-    fontSize: 11,
-  },
-  handRow: {
+  aiHandCenter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  aiCardWrapper: {
+    marginHorizontal: -6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  aiPileSlot: {
+    width: 60,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+
+  /* Tavolo Centrale in Feltro */
   centerTable: {
     flex: 1,
-    marginHorizontal: 10,
+    marginHorizontal: 8,
     marginVertical: 4,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#166534',
+    borderColor: '#14532d',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
@@ -414,92 +454,20 @@ const styles = StyleSheet.create({
   feltSurface: {
     flex: 1,
     backgroundColor: '#15803d',
-    padding: 10,
-    justifyContent: 'space-between',
-  },
-  actionPill: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(9, 14, 23, 0.85)',
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#334155',
-    maxWidth: '94%',
-  },
-  actionPillText: {
-    color: '#fde047',
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  dealingOverlayBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-    borderWidth: 1.5,
-    borderColor: '#d97706',
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    alignSelf: 'center',
-    marginTop: 6,
-  },
-  dealingOverlayText: {
-    color: '#fef08a',
-    fontSize: 12.5,
-    fontWeight: '800',
-  },
-  aiPlayedContainer: {
-    position: 'absolute',
-    top: 48,
-    alignSelf: 'center',
-    zIndex: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.95)',
     padding: 8,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#ef4444',
-    alignItems: 'center',
-    shadowColor: '#ef4444',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 10,
+    justifyContent: 'center',
   },
-  aiPlayedHeader: {
+  tableCenterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginBottom: 4,
+    justifyContent: 'center',
+    flex: 1,
+    gap: 12,
   },
-  aiPlayedHeaderText: {
-    color: '#fca5a5',
-    fontSize: 11,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-  },
-  aiPlayedCardGlow: {
-    borderColor: '#ef4444',
-    borderWidth: 2,
-  },
-  emptyTablePlaceholder: {
+  talloneSlot: {
+    marginRight: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 28,
-  },
-  emptyTableText: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  emptyTableSub: {
-    color: 'rgba(255, 255, 255, 0.25)',
-    fontSize: 12,
-    marginTop: 2,
   },
   tableCardsGrid: {
     flexDirection: 'row',
@@ -507,7 +475,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    paddingVertical: 6,
+    flex: 1,
+    maxWidth: 380,
   },
   tableCardWrapper: {
     position: 'relative',
@@ -518,7 +487,7 @@ const styles = StyleSheet.create({
   tableCardSelected: {
     borderColor: '#eab308',
     borderWidth: 3,
-    transform: [{ translateY: -8 }],
+    transform: [{ translateY: -6 }],
     shadowColor: '#eab308',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.6,
@@ -534,21 +503,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 10,
   },
-  aiTargetBadge: {
-    position: 'absolute',
-    top: -6,
-    right: -4,
-    backgroundColor: '#ef4444',
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    zIndex: 5,
-  },
-  aiTargetBadgeText: {
-    color: '#ffffff',
-    fontSize: 8,
-    fontWeight: '900',
-  },
   userSelectedBadge: {
     position: 'absolute',
     top: -6,
@@ -561,60 +515,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 5,
   },
-  decksSideRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: 12,
-    paddingTop: 4,
+
+  /* Overlay animato giocata IA */
+  aiAnimatedSlot: {
+    position: 'absolute',
+    alignSelf: 'center',
+    zIndex: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 12,
   },
-  pileContainer: {
-    alignItems: 'center',
+  aiPlayedCardGlow: {
+    borderColor: '#ef4444',
+    borderWidth: 2.5,
   },
-  pileLabel: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: '700',
-    marginBottom: 3,
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowRadius: 2,
-  },
-  emptyPile: {
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyDeckIcon: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 9,
-    fontWeight: '700',
-  },
-  pileCount: {
-    color: '#fde047',
-    fontSize: 11,
-    fontWeight: '800',
-    marginTop: 2,
-  },
-  drawDeckContainer: {
-    alignItems: 'center',
-  },
-  drawDeckLabel: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: '700',
-    marginBottom: 3,
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowRadius: 2,
-  },
-  drawDeckStack: {
+
+  /* Pile Fisiche di Carte */
+  pileStack: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  deckStackLayer1: {
+  pileLayer1: {
     position: 'absolute',
     top: -2,
     left: -2,
@@ -623,7 +547,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#475569',
   },
-  deckStackLayer2: {
+  pileLayer2: {
     position: 'absolute',
     top: -4,
     left: -4,
@@ -632,14 +556,38 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#334155',
   },
-  drawDeckCount: {
-    color: '#fde047',
-    fontSize: 11,
-    fontWeight: '800',
-    marginTop: 2,
+  emptyPile: {
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderStyle: 'dashed',
   },
+
+  /* Banner Distribuzione */
+  dealingOverlayBanner: {
+    position: 'absolute',
+    top: 8,
+    alignSelf: 'center',
+    zIndex: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.92)',
+    borderWidth: 1,
+    borderColor: '#d97706',
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+  },
+  dealingOverlayText: {
+    color: '#fef08a',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+
+  /* Area Giocatore */
   playerArea: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     paddingBottom: 4,
   },
   actionToolbar: {
@@ -647,72 +595,65 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  mainActionBtn: {
-    flex: 1,
+  actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 6,
-    borderRadius: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    minHeight: 44,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    minHeight: 38,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
   },
-  captureActionBtn: {
+  actionBtnCapture: {
     backgroundColor: '#059669',
   },
-  discardActionBtn: {
+  actionBtnPlay: {
     backgroundColor: '#0284c7',
   },
-  mainActionBtnText: {
+  actionBtnText: {
     color: '#ffffff',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
-  cancelSelectionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(51, 65, 85, 0.8)',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    minHeight: 40,
+  actionBtnCancel: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(30, 41, 59, 0.85)',
     borderWidth: 1,
     borderColor: '#475569',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  cancelSelectionText: {
-    color: '#cbd5e1',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  playerHeader: {
+  playerBottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
+    justifyContent: 'space-between',
   },
-  playerSectionTitle: {
-    color: '#94a3b8',
-    fontSize: 12,
-    fontWeight: '700',
+  playerInfoSlot: {
+    width: 60,
+    alignItems: 'flex-start',
   },
   playerHandRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'flex-end',
-    gap: 12,
-    minHeight: 106,
+    gap: 6,
   },
   playerHandCard: {
-    marginHorizontal: 2,
+    marginHorizontal: 1,
+  },
+  playerPileSlot: {
+    width: 60,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
 });

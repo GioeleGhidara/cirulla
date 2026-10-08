@@ -75,7 +75,7 @@ export const CIRULLA_GUIDE: GuideSection[] = [
     content:
       'All\'inizio di ogni mano da 3 carte, prima di giocare, controlla bene cosa hai ricevuto:\n\n• Somma ≤ 9 ("Cirulla"): bussa sul tavolo dichiarando "Cirulla"! Guadagni subito 3 Scope (3 punti) e giochi la mano a carte scoperte.\n• Tre carte uguali ("Decino"): bussa forte sul tavolo dichiarando "Decino"! Guadagni subito 10 Scope (10 punti) e giochi a carte scoperte tra i complimenti (e i mugugni) degli avversari.',
     curiosity:
-      'La Matta: Il 7 di Cuori (o 7 di Spade) è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per realizzare una Cirulla (3 pt) o un Decino (10 pt)!',
+      'La Matta: Il 7 di Cuori è la Matta. Può assumere qualsiasi valore dall\'Asso al Re per realizzare una Cirulla (3 pt) o un Decino (10 pt)!',
   },
   {
     title: 'Le Prese: Regola del 15, Uguale e Somma',

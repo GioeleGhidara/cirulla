@@ -4,7 +4,7 @@ import { GAME_CONFIG } from '../constants/gameConfig';
 
 export const isMatta = (card: Card): boolean => {
   const s = card.suit.toLowerCase();
-  return (s === 'cuori' || s === 'picche' || s === 'spade') && card.rank === 7;
+  return s === 'cuori' && card.rank === 7;
 };
 
 export const isQuadri = (card: Card): boolean => {

@@ -330,19 +330,6 @@ const CardViewBase: React.FC<CardViewProps> = ({
           </View>
         </>
       )}
-
-      {/* Badges for special cards: Settebello & Matta */}
-      {isSettebelloCard && (
-        <View style={styles.settebelloBadge}>
-          <Text style={styles.badgeText}>7 BELLO</Text>
-        </View>
-      )}
-
-      {cardIsMatta && (
-        <View style={styles.mattaBadge}>
-          <Text style={styles.mattaBadgeText}>MATTA</Text>
-        </View>
-      )}
     </View>
   );
 
@@ -519,37 +506,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     color: '#334155',
-  },
-  settebelloBadge: {
-    position: 'absolute',
-    bottom: 2,
-    left: 2,
-    right: 2,
-    backgroundColor: '#f59e0b',
-    borderRadius: 3,
-    alignItems: 'center',
-    paddingVertical: 1,
-    zIndex: 3,
-  },
-  badgeText: {
-    color: '#78350f',
-    fontSize: 7.5,
-    fontWeight: '900',
-  },
-  mattaBadge: {
-    position: 'absolute',
-    bottom: 2,
-    left: 2,
-    right: 2,
-    backgroundColor: '#3b82f6',
-    borderRadius: 3,
-    alignItems: 'center',
-    paddingVertical: 1,
-    zIndex: 3,
-  },
-  mattaBadgeText: {
-    color: '#eff6ff',
-    fontSize: 7.5,
-    fontWeight: '900',
   },
 });
