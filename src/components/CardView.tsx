@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Image } from 'reac
 import Svg, { Path, Circle, Rect, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { Card, CardGraphicStyle, DeckStyle, Suit } from '../types/card';
 import { isMatta, isSettebello } from '../engine/rules';
+import { getGenovesiCardImage, getGenovesiCardBack } from '../assets/genovesiDeck';
 
 export function getDeckOfCardsApiUrl(card: Card): string {
   const normSuit = (card.suit || '').toLowerCase();
@@ -346,6 +347,10 @@ export const CardView: React.FC<CardViewProps> = ({
 }) => {
   const [imageLoadError, setImageLoadError] = useState(false);
 
+  const isGenovesiDeck = deckStyle === 'genovesi';
+  const useGenovesiBack = isGenovesiDeck && graphicStyle !== 'moderno';
+  const genovesiBack = useGenovesiBack ? getGenovesiCardBack() : null;
+
   if (faceDown || !card) {
     return (
       <View
@@ -357,34 +362,44 @@ export const CardView: React.FC<CardViewProps> = ({
           style,
         ]}
       >
-        <View style={styles.backPatternInner}>
-          <Svg width={width - 8} height={height - 8} viewBox="0 0 60 88">
-            <Defs>
-              <LinearGradient id="backGrad" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0%" stopColor="#1e293b" />
-                <Stop offset="50%" stopColor="#0f172a" />
-                <Stop offset="100%" stopColor="#020617" />
-              </LinearGradient>
-            </Defs>
-            <Rect x="0" y="0" width="60" height="88" rx="5" fill="url(#backGrad)" />
-            <Rect
-              x="3"
-              y="3"
-              width="54"
-              height="82"
-              rx="4"
-              fill="none"
-              stroke="#e2e8f0"
-              strokeWidth="0.8"
-              strokeDasharray="2,2"
+        {genovesiBack ? (
+          <View style={styles.classicImageContainer}>
+            <Image
+              source={genovesiBack}
+              style={styles.classicCardImage}
+              resizeMode="cover"
             />
-            {/* Cross filigree pattern */}
-            <Path d="M4 4 L56 84 M56 4 L4 84" stroke="#334155" strokeWidth="0.5" />
-            <Circle cx="30" cy="44" r="14" fill="#1e3a8a" stroke="#fbbf24" strokeWidth="1" />
-            <Circle cx="30" cy="44" r="10" fill="none" stroke="#f59e0b" strokeWidth="0.8" />
-            <Path d="M30 36 L30 52 M22 44 L38 44" stroke="#fde047" strokeWidth="1.5" />
-          </Svg>
-        </View>
+          </View>
+        ) : (
+          <View style={styles.backPatternInner}>
+            <Svg width={width - 8} height={height - 8} viewBox="0 0 60 88">
+              <Defs>
+                <LinearGradient id="backGrad" x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0%" stopColor="#1e293b" />
+                  <Stop offset="50%" stopColor="#0f172a" />
+                  <Stop offset="100%" stopColor="#020617" />
+                </LinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="60" height="88" rx="5" fill="url(#backGrad)" />
+              <Rect
+                x="3"
+                y="3"
+                width="54"
+                height="82"
+                rx="4"
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth="0.8"
+                strokeDasharray="2,2"
+              />
+              {/* Cross filigree pattern */}
+              <Path d="M4 4 L56 84 M56 4 L4 84" stroke="#334155" strokeWidth="0.5" />
+              <Circle cx="30" cy="44" r="14" fill="#1e3a8a" stroke="#fbbf24" strokeWidth="1" />
+              <Circle cx="30" cy="44" r="10" fill="none" stroke="#f59e0b" strokeWidth="0.8" />
+              <Path d="M30 36 L30 52 M22 44 L38 44" stroke="#fde047" strokeWidth="1.5" />
+            </Svg>
+          </View>
+        )}
       </View>
     );
   }
@@ -398,8 +413,15 @@ export const CardView: React.FC<CardViewProps> = ({
     ? normSuit === 'coppe' || normSuit === 'denari'
     : normSuit === 'cuori' || normSuit === 'denari' || normSuit === 'quadri';
 
+  const showGenovesiImage =
+    (graphicStyle === 'genovesi_autentiche' ||
+      graphicStyle === undefined ||
+      (isGenovesiDeck && graphicStyle !== 'moderno' && graphicStyle !== 'classico')) &&
+    !imageLoadError;
+  const genovesiImg = showGenovesiImage ? getGenovesiCardImage(card) : null;
+
   const showClassicImage =
-    graphicStyle === 'classico' && !isRegional && !imageLoadError;
+    !genovesiImg && graphicStyle === 'classico' && !isRegional && !imageLoadError;
   const classicImgUrl = showClassicImage ? getDeckOfCardsApiUrl(card) : '';
 
   const cardContent = (
@@ -414,7 +436,21 @@ export const CardView: React.FC<CardViewProps> = ({
         style,
       ]}
     >
-      {showClassicImage && classicImgUrl ? (
+      {genovesiImg ? (
+        <View style={styles.classicImageContainer}>
+          <Image
+            source={genovesiImg}
+            style={styles.classicCardImage}
+            resizeMode="contain"
+            onError={() => setImageLoadError(true)}
+          />
+          {isFigure && (
+            <View style={styles.cirullaFigureValPill}>
+              <Text style={styles.cirullaFigureValText}>Val: {card.value}</Text>
+            </View>
+          )}
+        </View>
+      ) : showClassicImage && classicImgUrl ? (
         <View style={styles.classicImageContainer}>
           <Image
             source={{ uri: classicImgUrl }}

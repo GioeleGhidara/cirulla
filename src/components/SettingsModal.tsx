@@ -72,19 +72,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* Aspetto Grafico Carte */}
             {settings.deckStyle === 'genovesi' && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Aspetto Grafico Carte</Text>
+                <Text style={styles.sectionTitle}>Aspetto Grafico Carte Genovesi</Text>
                 <View style={styles.pillRow}>
                   <TouchableOpacity
                     style={[
                       styles.pillBtn,
-                      (settings.cardGraphicStyle ?? 'moderno') === 'moderno' && styles.pillBtnActive,
+                      (settings.cardGraphicStyle ?? 'genovesi_autentiche') === 'genovesi_autentiche' && styles.pillBtnActive,
+                    ]}
+                    onPress={() => update({ cardGraphicStyle: 'genovesi_autentiche' })}
+                  >
+                    <Text
+                      style={[
+                        styles.pillText,
+                        (settings.cardGraphicStyle ?? 'genovesi_autentiche') === 'genovesi_autentiche' && styles.pillTextActive,
+                      ]}
+                    >
+                      Genovesi Storiche (Baccarat)
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.pillBtn,
+                      settings.cardGraphicStyle === 'moderno' && styles.pillBtnActive,
                     ]}
                     onPress={() => update({ cardGraphicStyle: 'moderno' })}
                   >
                     <Text
                       style={[
                         styles.pillText,
-                        (settings.cardGraphicStyle ?? 'moderno') === 'moderno' && styles.pillTextActive,
+                        settings.cardGraphicStyle === 'moderno' && styles.pillTextActive,
                       ]}
                     >
                       Vettoriale Moderno
@@ -104,7 +121,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         settings.cardGraphicStyle === 'classico' && styles.pillTextActive,
                       ]}
                     >
-                      Classico Illustrato
+                      Francesi Classiche
                     </Text>
                   </TouchableOpacity>
                 </View>

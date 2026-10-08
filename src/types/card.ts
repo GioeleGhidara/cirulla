@@ -89,7 +89,7 @@ export interface GameStats {
   readonly accuseDieciMade: number;
 }
 
-export type CardGraphicStyle = 'moderno' | 'classico';
+export type CardGraphicStyle = 'genovesi_autentiche' | 'moderno' | 'classico';
 
 export interface GameSettings {
   readonly deckStyle: DeckStyle;

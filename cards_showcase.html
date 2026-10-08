@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cirulla - Campionario Layout Completo Carte</title>
+  <title>Cirulla - Campionario Completo Carte Genovesi</title>
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: #0f172a;
-      --card-border: #334155;
+      --bg: #0b1320;
+      --card-bg: #152238;
+      --card-border: #2e4368;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --accent: #38bdf8;
@@ -23,40 +23,53 @@
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0%, #090d16 100%);
+      background: radial-gradient(circle at top, #1e2e4a 0%, #090d16 100%);
       color: var(--text);
       padding: 24px 16px;
       min-height: 100vh;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
     }
     header {
       text-align: center;
       margin-bottom: 28px;
     }
-    h1 {
-      font-size: 28px;
-      font-weight: 900;
+    .badge-top {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde047;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
       letter-spacing: 1px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
       background: linear-gradient(135deg, #fef08a, #f59e0b, #ef4444);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     p.subtitle {
       color: var(--text-muted);
-      font-size: 14px;
-      max-width: 700px;
+      font-size: 15px;
+      max-width: 760px;
       margin: 0 auto;
       line-height: 1.5;
     }
     .rules-banner {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 14px 18px;
+      border-radius: 14px;
+      padding: 16px 20px;
       margin-bottom: 24px;
       display: flex;
       flex-wrap: wrap;
@@ -77,23 +90,92 @@
       font-weight: 800;
       font-size: 11px;
     }
+
+    /* Style Switcher */
+    .switcher-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .switch-btn {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .switch-btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .switch-btn.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+    }
+
+    /* Back Card Showcase */
+    .back-showcase {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px 24px;
+      margin-bottom: 28px;
+    }
+    .back-thumb {
+      width: 76px;
+      height: 118px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border: 1px solid #000;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .back-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .back-info h3 {
+      font-size: 16px;
+      color: #fde047;
+      margin-bottom: 4px;
+    }
+    .back-info p {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    /* Suit Section */
     .suit-section {
       margin-bottom: 32px;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.75);
       border: 1px solid #1e293b;
       border-radius: 16px;
-      padding: 18px;
+      padding: 20px;
     }
     .suit-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #334155;
-      padding-bottom: 10px;
-      margin-bottom: 16px;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
     }
     .suit-title {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -102,175 +184,148 @@
     .suit-count {
       font-size: 12px;
       color: var(--text-muted);
-      font-weight: 600;
+      background: #1e293b;
+      padding: 4px 10px;
+      border-radius: 6px;
     }
+
+    /* Cards Grid */
     .cards-row {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 14px;
     }
     .card-card {
-      background: #1e293b;
+      background: #0f172a;
       border: 1px solid #334155;
       border-radius: 10px;
-      padding: 8px 6px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: transform 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .card-card:hover {
       transform: translateY(-4px);
       border-color: #38bdf8;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
     .card-visual {
-      width: 76px;
-      height: 112px;
-      background: #ffffff;
+      width: 86px;
+      height: 134px;
       border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
-      position: relative;
+      background: #ffffff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.35);
       overflow: hidden;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 4px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      border: 1px solid #cbd5e1;
     }
     .card-visual img {
       width: 100%;
       height: 100%;
       object-fit: contain;
+      display: block;
     }
+
     .card-meta {
       width: 100%;
-      margin-top: 6px;
       text-align: center;
     }
     .card-name {
-      font-size: 10.5px;
+      font-size: 12px;
       font-weight: 800;
-      color: #f8fafc;
+      margin-bottom: 3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .card-subtext {
       display: flex;
-      justify-content: space-between;
-      font-size: 9px;
+      justify-content: space-around;
+      font-size: 11px;
       color: var(--text-muted);
-      margin-top: 2px;
-      padding: 0 2px;
+      margin-bottom: 4px;
     }
     .card-val {
-      color: #fbbf24;
+      color: #fde047;
       font-weight: 700;
     }
+
+    /* Badges */
     .card-badge {
-      margin-top: 4px;
-      font-size: 7.5px;
-      font-weight: 900;
-      padding: 2px 4px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
       display: inline-block;
-    }
-    .badge-settebello {
-      background: #f59e0b;
-      color: #78350f;
-    }
-    .badge-matta {
-      background: #3b82f6;
-      color: #eff6ff;
-    }
-    .badge-piccola {
-      background: #10b981;
-      color: #064e3b;
-    }
-    .badge-grande {
-      background: #ec4899;
-      color: #831843;
-    }
-    .badge-asso {
-      background: #8b5cf6;
-      color: #ede9fe;
-    }
-    /* Vector card layout */
-    .corner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1;
-    }
-    .corner.bottom {
-      transform: rotate(180deg);
-    }
-    .rank-text {
-      font-size: 11px;
+      font-size: 9.5px;
       font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
     }
-    .red { color: #dc2626; }
-    .black { color: #0f172a; }
-    .center-figure {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-    .figure-tag {
-      background: #0f172a;
-      color: #fff;
-      font-size: 7px;
-      font-weight: 900;
-      padding: 1px 3px;
-      border-radius: 3px;
-    }
-    .figure-num {
-      font-size: 10px;
-      font-weight: 900;
-      color: #334155;
-    }
-    .special-overlay {
-      position: absolute;
-      bottom: 2px;
-      left: 2px;
-      right: 2px;
-      font-size: 6.5px;
-      font-weight: 900;
-      text-align: center;
-      padding: 1px 0;
-      border-radius: 2px;
-    }
+    .badge-settebello { background: #d97706; color: #fff; }
+    .badge-matta { background: #7c3aed; color: #fff; }
+    .badge-piccola { background: #059669; color: #fff; }
+    .badge-grande { background: #db2777; color: #fff; }
+    .badge-asso { background: #2563eb; color: #fff; }
+    .badge-figura { background: #475569; color: #f1f5f9; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>CIRULLA LIGURE - CAMPIONARIO COMPLETO CARTE</h1>
+      <div class="badge-top">Carte Regionali della Tradizione Ligure</div>
+      <h1>Campionario Completo Carte Genovesi</h1>
       <p class="subtitle">
-        Layout dei 4 semi tradizionali per 40 carte totali. Carte Genovesi con segni francesi (Cuori ♥, Quadri/Denari ♦, Picche ♠, Fiori ♣).
+        Grafiche autentiche estratte dal mazzo storico ligure (Baccarat / Aisleriot - Dal Negro Treviso).
+        Le carte genovesi utilizzano i semi francesi con figure storiche distinte: Fante (Jack=8), Donna (Queen=9) e Re (King=10).
       </p>
     </header>
 
+    <!-- Regole Rapide Cirulla -->
     <div class="rules-banner">
       <div class="rule-item">
-        <span class="rule-badge">FIGURE</span>
-        <span><strong>Jack (Fante) = 8</strong> | <strong>Donna = 9</strong> | <strong>Re = 10</strong></span>
+        <span class="rule-badge">JACK / FANTE = 8</span>
+        <span>Vale 8 per prese e bussate</span>
       </div>
       <div class="rule-item">
-        <span class="rule-badge">SETTEBELLO</span>
-        <span><strong>7 di Denari (♦)</strong> = +1 pt mazzo</span>
+        <span class="rule-badge">DONNA = 9</span>
+        <span>Vale 9 per prese e bussate</span>
       </div>
       <div class="rule-item">
-        <span class="rule-badge">MATTA</span>
-        <span><strong>7 di Cuori (♥)</strong> = Jolly per Bussate (3 o 10 pt)</span>
+        <span class="rule-badge">RE = 10</span>
+        <span>Vale 10 per prese e bussate</span>
       </div>
       <div class="rule-item">
-        <span class="rule-badge">CAPPOTTO</span>
-        <span><strong>10 Denari presi</strong> = Vittoria immediata</span>
+        <span class="rule-badge" style="background:#d97706;">★ 7 BELLO</span>
+        <span>7♦ vale 1 punto di mazzo</span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-badge" style="background:#7c3aed;">🃏 LA MATTA</span>
+        <span>7♥ jolly nelle combinazioni</span>
+      </div>
+    </div>
+
+    <!-- Switcher Stile -->
+    <div class="switcher-row">
+      <button class="switch-btn active" id="btn-genovesi" onclick="switchDeck('genovesi')">
+        🏛️ Carte Genovesi Storiche (Baccarat - Dal Negro)
+      </button>
+      <button class="switch-btn" id="btn-poker" onclick="switchDeck('poker')">
+        🃏 Carte Francesi Classiche (Poker)
+      </button>
+    </div>
+
+    <!-- Card Back Showcase -->
+    <div class="back-showcase">
+      <div class="back-thumb">
+        <img id="back-img" src="assets/cards/genovesi/back.png" alt="Dorso Mazzo Genovese" />
+      </div>
+      <div class="back-info">
+        <h3>Dorso Storico Carte Genovesi</h3>
+        <p>Incisione classica con il castello di Treviso della manifattura Dal Negro, riprodotta ad altissima definizione per il mazzo Cirulla.</p>
       </div>
     </div>
 
@@ -278,8 +333,8 @@
     <div class="suit-section">
       <div class="suit-header">
         <div class="suit-title" style="color: #ef4444;">
-          <span>♦ DENARI (QUADRI)</span>
-          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Il seme più nobile ("palanche")</span>
+          <span>♦ DENARI (Quadri)</span>
+          <span style="font-size: 13px; font-weight: normal; color: #fca5a5;">- Seme regina per Piccola, Grande e Cappotto</span>
         </div>
         <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
       </div>
@@ -291,7 +346,7 @@
       <div class="suit-header">
         <div class="suit-title" style="color: #ef4444;">
           <span>♥ CUORI</span>
-          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Include la leggendaria Matta (7♥)</span>
+          <span style="font-size: 13px; font-weight: normal; color: #fca5a5;">- Contiene il 7 di Cuori (La Matta)</span>
         </div>
         <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
       </div>
@@ -303,7 +358,7 @@
       <div class="suit-header">
         <div class="suit-title" style="color: #94a3b8;">
           <span>♠ PICCHE</span>
-          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Seme nero di picca</span>
+          <span style="font-size: 13px; font-weight: normal; color: #cbd5e1;">- Seme nero di picca ligure</span>
         </div>
         <div class="suit-count">10 Carte (1..7, Jack 8, Donna 9, Re 10)</div>
       </div>
@@ -324,6 +379,8 @@
   </div>
 
   <script>
+    let currentDeck = 'genovesi';
+
     const suits = [
       { id: 'denari', code: 'D', name: 'Denari', symbol: '♦', color: 'red' },
       { id: 'cuori', code: 'H', name: 'Cuori', symbol: '♥', color: 'red' },
@@ -339,47 +396,67 @@
       { rank: 5, val: 5, codeRank: '5', name: 'Cinque', primiera: 15 },
       { rank: 6, val: 6, codeRank: '6', name: 'Sei', primiera: 18 },
       { rank: 7, val: 7, codeRank: '7', name: 'Sette', primiera: 21 },
-      { rank: 8, val: 8, codeRank: 'J', name: 'Jack', primiera: 10 },
+      { rank: 8, val: 8, codeRank: 'J', name: 'Jack (Fante)', primiera: 10 },
       { rank: 9, val: 9, codeRank: 'Q', name: 'Donna', primiera: 10 },
       { rank: 10, val: 10, codeRank: 'K', name: 'Re', primiera: 10 },
     ];
 
-    suits.forEach(suit => {
-      const container = document.getElementById('row-' + suit.id);
-      cardsData.forEach(card => {
-        const imgUrl = `https://deckofcardsapi.com/static/img/${card.codeRank}${suit.code}.png`;
-        const cardBox = document.createElement('div');
-        cardBox.className = 'card-card';
+    function renderCards() {
+      suits.forEach(suit => {
+        const container = document.getElementById('row-' + suit.id);
+        container.innerHTML = '';
+        cardsData.forEach(card => {
+          let imgUrl = '';
+          if (currentDeck === 'genovesi') {
+            imgUrl = `assets/cards/genovesi/${suit.id}_${card.rank}.png`;
+          } else {
+            imgUrl = `https://deckofcardsapi.com/static/img/${card.codeRank}${suit.code}.png`;
+          }
 
-        let badgeHtml = '';
-        if (suit.id === 'denari' && card.rank === 7) {
-          badgeHtml = '<span class="card-badge badge-settebello">★ 7 BELLO (+1)</span>';
-        } else if (suit.id === 'cuori' && card.rank === 7) {
-          badgeHtml = '<span class="card-badge badge-matta">🃏 LA MATTA</span>';
-        } else if (suit.id === 'denari' && card.rank <= 3) {
-          badgeHtml = '<span class="card-badge badge-piccola">PICCOLA</span>';
-        } else if (suit.id === 'denari' && card.rank >= 8) {
-          badgeHtml = '<span class="card-badge badge-grande">GRANDE</span>';
-        } else if (card.rank === 1) {
-          badgeHtml = '<span class="card-badge badge-asso">ASSO PIGLIA</span>';
-        }
+          const cardBox = document.createElement('div');
+          cardBox.className = 'card-card';
 
-        cardBox.innerHTML = `
-          <div class="card-visual">
-            <img src="${imgUrl}" alt="${card.name} di ${suit.name}" loading="lazy" />
-          </div>
-          <div class="card-meta">
-            <div class="card-name">${card.name} di ${suit.name}</div>
-            <div class="card-subtext">
-              <span class="card-val">Val: ${card.val}</span>
-              <span>P: ${card.primiera}pt</span>
+          let badgeHtml = '';
+          if (suit.id === 'denari' && card.rank === 7) {
+            badgeHtml = '<span class="card-badge badge-settebello">★ 7 BELLO (+1)</span>';
+          } else if (suit.id === 'cuori' && card.rank === 7) {
+            badgeHtml = '<span class="card-badge badge-matta">🃏 LA MATTA</span>';
+          } else if (suit.id === 'denari' && card.rank <= 3) {
+            badgeHtml = '<span class="card-badge badge-piccola">PICCOLA</span>';
+          } else if (suit.id === 'denari' && card.rank >= 8) {
+            badgeHtml = '<span class="card-badge badge-grande">GRANDE</span>';
+          } else if (card.rank === 1) {
+            badgeHtml = '<span class="card-badge badge-asso">ASSO PIGLIA</span>';
+          } else if (card.rank >= 8) {
+            badgeHtml = `<span class="card-badge badge-figura">FIGURA (${card.val})</span>`;
+          }
+
+          cardBox.innerHTML = `
+            <div class="card-visual">
+              <img src="${imgUrl}" alt="${card.name} di ${suit.name}" loading="lazy" />
             </div>
-            ${badgeHtml}
-          </div>
-        `;
-        container.appendChild(cardBox);
+            <div class="card-meta">
+              <div class="card-name">${card.name}</div>
+              <div class="card-subtext">
+                <span class="card-val">Val: ${card.val}</span>
+                <span>P: ${card.primiera}pt</span>
+              </div>
+              ${badgeHtml}
+            </div>
+          `;
+          container.appendChild(cardBox);
+        });
       });
-    });
+    }
+
+    function switchDeck(deck) {
+      currentDeck = deck;
+      document.getElementById('btn-genovesi').classList.toggle('active', deck === 'genovesi');
+      document.getElementById('btn-poker').classList.toggle('active', deck === 'poker');
+      renderCards();
+    }
+
+    renderCards();
   </script>
 </body>
 </html>

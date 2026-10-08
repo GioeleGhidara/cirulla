@@ -29,13 +29,14 @@ export const DeckGalleryModal: React.FC<DeckGalleryModalProps> = ({
   visible,
   onClose,
   currentDeckStyle = 'genovesi',
-  currentGraphicStyle = 'moderno',
+  currentGraphicStyle = 'genovesi_autentiche',
   onSelectGraphicStyle,
   onSelectDeckStyle,
 }) => {
   const [selectedDeckStyle, setSelectedDeckStyle] = useState<DeckStyle>(currentDeckStyle);
   const [selectedGraphicStyle, setSelectedGraphicStyle] = useState<CardGraphicStyle>(currentGraphicStyle);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('tutti');
+  const [showBackPreview, setShowBackPreview] = useState(false);
 
   const deck = useMemo(() => {
     return createDeck(selectedDeckStyle);
@@ -133,6 +134,23 @@ export const DeckGalleryModal: React.FC<DeckGalleryModalProps> = ({
                 <TouchableOpacity
                   style={[
                     styles.pillOption,
+                    selectedGraphicStyle === 'genovesi_autentiche' && styles.pillOptionActive,
+                  ]}
+                  onPress={() => handleGraphicStyleChange('genovesi_autentiche')}
+                >
+                  <Text
+                    style={[
+                      styles.pillOptionText,
+                      selectedGraphicStyle === 'genovesi_autentiche' && styles.pillOptionTextActive,
+                    ]}
+                  >
+                    Genovesi Storiche (Baccarat)
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.pillOption,
                     selectedGraphicStyle === 'moderno' && styles.pillOptionActive,
                   ]}
                   onPress={() => handleGraphicStyleChange('moderno')}
@@ -160,7 +178,7 @@ export const DeckGalleryModal: React.FC<DeckGalleryModalProps> = ({
                       selectedGraphicStyle === 'classico' && styles.pillOptionTextActive,
                     ]}
                   >
-                    Classico Illustrato
+                    Francesi Poker
                   </Text>
                 </TouchableOpacity>
               </View>
