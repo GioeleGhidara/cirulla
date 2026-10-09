@@ -222,14 +222,14 @@ export function useCirullaGame() {
     setIsShufflingOrDealing(true);
     setDealingMessage(
       currentDealer === 'player'
-        ? 'Distribuzione carte...'
-        : "L'avversario distribuisce le carte..."
+        ? 'Tu mescoli e distribuisci...'
+        : "L'avversario mescola e distribuisce..."
     );
     playSound('card', currentSettings.soundEnabled, currentSettings.hapticsEnabled);
     setTimeout(() => {
       setIsShufflingOrDealing(false);
       setDealingMessage(null);
-    }, 1400);
+    }, 2400);
 
     const playerStarts = currentDealer === 'ai';
     setIsPlayerTurn(playerStarts);
@@ -349,7 +349,11 @@ export function useCirullaGame() {
         );
         const nextDeck = deck.slice(GAME_CONFIG.DEAL.HAND_SIZE * 2);
 
+        setIsShufflingOrDealing(true);
+        setDealingMessage(`Distribuzione mano ${nextHandIndex}/6...`);
         setTimeout(() => {
+          setIsShufflingOrDealing(false);
+          setDealingMessage(null);
           setHandIndex(nextHandIndex);
           setPlayerHand(nextPHand);
           setAiHand(nextAHand);
@@ -378,7 +382,7 @@ export function useCirullaGame() {
             isPlayerTurn: playerStarts,
             savedAt: Date.now(),
           });
-        }, GAME_CONFIG.TIMINGS.DEAL_TRANSITION_DELAY_MS);
+        }, 1300);
       } else {
         setTimeout(() => {
           finalizeDeal();
@@ -802,6 +806,10 @@ export function useCirullaGame() {
         saveSettings(customSettings);
       }
       startNewMatch(cfg, chosenDealer ?? 'ai');
+    },
+    finishDealing: () => {
+      setIsShufflingOrDealing(false);
+      setDealingMessage(null);
     },
     updateSettings,
     resetStats,

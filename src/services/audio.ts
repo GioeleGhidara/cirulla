@@ -131,6 +131,29 @@ class SoundSynthesizer {
       });
     } catch {}
   }
+
+  playShuffle() {
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      for (let i = 0; i < 7; i++) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        const start = ctx.currentTime + i * 0.05;
+        osc.frequency.setValueAtTime(360 + (i % 2) * 60, start);
+        osc.frequency.exponentialRampToValueAtTime(130, start + 0.038);
+
+        gain.gain.setValueAtTime(0.22, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.038);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.045);
+      }
+    } catch {}
+  }
 }
 
 const synth = new SoundSynthesizer();
@@ -161,12 +184,13 @@ export async function triggerHaptic(type: 'light' | 'medium' | 'heavy' | 'succes
 }
 
 export function playSound(
-  sound: 'card' | 'capture' | 'scopa' | 'accusa' | 'victory',
+  sound: 'card' | 'capture' | 'scopa' | 'accusa' | 'victory' | 'shuffle',
   soundEnabled: boolean = true,
   hapticsEnabled: boolean = true
 ) {
   if (soundEnabled) {
     if (sound === 'card') synth.playCardSnap();
+    if (sound === 'shuffle') synth.playShuffle();
     if (sound === 'capture') synth.playCaptureChime();
     if (sound === 'scopa') synth.playScopaFanfare();
     if (sound === 'accusa') synth.playAccusa();
@@ -174,7 +198,7 @@ export function playSound(
   }
 
   if (hapticsEnabled) {
-    if (sound === 'card') triggerHaptic('light', hapticsEnabled);
+    if (sound === 'card' || sound === 'shuffle') triggerHaptic('light', hapticsEnabled);
     if (sound === 'capture') triggerHaptic('medium', hapticsEnabled);
     if (sound === 'scopa') triggerHaptic('success', hapticsEnabled);
     if (sound === 'accusa') triggerHaptic('heavy', hapticsEnabled);

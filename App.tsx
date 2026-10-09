@@ -190,6 +190,8 @@ export default function App() {
             dealingMessage={game.dealingMessage}
             deckCount={game.deckCount}
             dealer={game.dealer}
+            handIndex={game.handIndex}
+            onFinishDealing={game.finishDealing}
             onSelectPlayerCard={game.selectPlayerCard}
             onToggleTableCard={game.toggleTableCard}
             onClearTableSelection={game.clearTableSelection}

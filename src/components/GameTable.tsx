@@ -14,6 +14,7 @@ import { Card, DeckStyle, CardGraphicStyle, DeckSkinId, PlayerSide } from '../ty
 import { Ionicons } from '@expo/vector-icons';
 import { AppBadge } from './common/AppBadge';
 import { theme } from '../theme/tokens';
+import { DealAnimationOverlay } from './DealAnimationOverlay';
 
 const isNativeDriver = Platform.OS !== 'web';
 
@@ -33,6 +34,8 @@ interface GameTableProps {
   dealingMessage?: string | null;
   deckCount: number;
   dealer: PlayerSide;
+  handIndex?: number;
+  onFinishDealing?: () => void;
   onSelectPlayerCard: (card: Card) => void;
   onToggleTableCard: (card: Card) => void;
   onClearTableSelection: () => void;
@@ -99,6 +102,8 @@ export const GameTable: React.FC<GameTableProps> = ({
   dealingMessage,
   deckCount,
   dealer,
+  handIndex = 1,
+  onFinishDealing,
   onSelectPlayerCard,
   onToggleTableCard,
   onClearTableSelection,
@@ -217,12 +222,22 @@ export const GameTable: React.FC<GameTableProps> = ({
       {/* 2. Al Centro: Tavolo da Gioco in Panno Verde Feltro */}
       <View style={styles.centerTable}>
         <View style={styles.feltSurface}>
-          {/* Banner discreto di mescolamento/distribuzione (solo quando avviene) */}
-          {isShufflingOrDealing && dealingMessage && (
-            <View style={styles.dealingOverlayBanner}>
-              <Ionicons name="shuffle" size={16} color={theme.colors.accentGoldLight} />
-              <Text style={styles.dealingOverlayText}>{dealingMessage}</Text>
-            </View>
+          {/* Animazione Fluida di Mescolamento, Taglio e Distribuzione in Campo */}
+          {isShufflingOrDealing && (
+            <DealAnimationOverlay
+              visible={isShufflingOrDealing}
+              isInitialDeal={handIndex === 1}
+              handIndex={handIndex}
+              dealer={dealer}
+              deckStyle={deckStyle}
+              deckSkinId={deckSkinId}
+              tableCards={tableCards}
+              playerHand={playerHand}
+              aiHand={aiHand}
+              onAnimationComplete={() => {
+                if (onFinishDealing) onFinishDealing();
+              }}
+            />
           )}
 
           {/* Mazzo (Tallone) sul tavolo: posizionato sul feltro verde a sinistra */}
