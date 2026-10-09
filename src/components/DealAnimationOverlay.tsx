@@ -6,7 +6,6 @@ import {
   Animated,
   Easing,
   Platform,
-  Pressable,
   Dimensions,
 } from 'react-native';
 import { CardView } from './CardView';
@@ -110,13 +109,6 @@ export const DealAnimationOverlay: React.FC<DealAnimationOverlayProps> = ({
     const t = setTimeout(fn, ms);
     timeoutsRef.current.push(t);
     return t;
-  };
-
-  const handleSkip = () => {
-    if (isCompletedRef.current) return;
-    isCompletedRef.current = true;
-    timeoutsRef.current.forEach(clearTimeout);
-    onAnimationComplete();
   };
 
   useEffect(() => {
@@ -459,12 +451,11 @@ export const DealAnimationOverlay: React.FC<DealAnimationOverlayProps> = ({
 
   return (
     <Animated.View style={[styles.overlayContainer, { opacity: overlayOpacity }]}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={handleSkip}>
-        {/* Subtle dark backdrop over the felt */}
-        <View style={styles.darkFeltTint} />
+      {/* Subtle dark backdrop over the felt */}
+      <View style={styles.darkFeltTint} />
 
-        {/* Top Header Badge */}
-        <View style={styles.topStatusPill}>
+      {/* Top Header Badge */}
+      <View style={styles.topStatusPill}>
           <Ionicons name="shuffle-outline" size={14} color={theme.colors.accentGoldLight} />
           <Text style={styles.topStatusDealer}>{dealerLabel}:</Text>
           <Text style={styles.topStatusAction}>{actionStatus}</Text>
@@ -669,11 +660,6 @@ export const DealAnimationOverlay: React.FC<DealAnimationOverlayProps> = ({
           })}
         </View>
 
-        {/* Skip hint */}
-        <View style={styles.skipHintRow}>
-          <Text style={styles.skipHintText}>Tocca per saltare</Text>
-        </View>
-      </Pressable>
     </Animated.View>
   );
 };
@@ -743,20 +729,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.55)',
     elevation: 12,
-  },
-  skipHintRow: {
-    position: 'absolute',
-    bottom: 16,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: theme.radii.full,
-  },
-  skipHintText: {
-    fontSize: 11,
-    color: theme.colors.textMuted,
-    fontWeight: '600',
-    letterSpacing: 0.3,
   },
 });
