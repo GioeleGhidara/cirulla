@@ -57,6 +57,12 @@ export function useCirullaGame() {
   const [lastCapturingPlayer, setLastCapturingPlayer] = useState<PlayerSide | null>(null);
 
   const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(true);
+  const [isAiTurnInProgress, setIsAiTurnInProgress] = useState<boolean>(false);
+  const isAiExecutingRef = useRef<boolean>(false);
+  const playerHandRef = useRef<Card[]>(playerHand);
+  playerHandRef.current = playerHand;
+  const aiHandRef = useRef<Card[]>(aiHand);
+  aiHandRef.current = aiHand;
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [selectedTableCardIds, setSelectedTableCardIds] = useState<string[]>([]);
   const [lastPlayedCardByAI, setLastPlayedCardByAI] = useState<Card | null>(null);
@@ -210,6 +216,8 @@ export function useCirullaGame() {
     setLastPlayedCardByAI(null);
     setAiTargetCardIds([]);
     setLastCapturingPlayer(null);
+    isAiExecutingRef.current = false;
+    setIsAiTurnInProgress(false);
 
     setIsShufflingOrDealing(true);
     setDealingMessage(
@@ -347,7 +355,8 @@ export function useCirullaGame() {
           setAiHand(nextAHand);
           setDeck(nextDeck);
 
-          setIsPlayerTurn(dealer === 'ai');
+          const playerStarts = dealer === 'ai';
+          setIsPlayerTurn(playerStarts);
           setLastActionMessage(`Mano ${nextHandIndex}/6 distribuita.`);
           checkAndApplyAccuse(nextPHand, nextAHand, settings);
 
@@ -366,7 +375,7 @@ export function useCirullaGame() {
             aiScope,
             playerAccusePts,
             aiAccusePts,
-            isPlayerTurn: dealer === 'ai',
+            isPlayerTurn: playerStarts,
             savedAt: Date.now(),
           });
         }, GAME_CONFIG.TIMINGS.DEAL_TRANSITION_DELAY_MS);
@@ -375,13 +384,29 @@ export function useCirullaGame() {
           finalizeDeal();
         }, GAME_CONFIG.TIMINGS.DEAL_FINALIZE_DELAY_MS);
       }
-    } else {
-      setIsPlayerTurn((prev) => !prev);
     }
-  }, [deck, handIndex, dealer, settings, checkAndApplyAccuse, finalizeDeal]);
+  }, [
+    deck,
+    handIndex,
+    dealer,
+    settings,
+    checkAndApplyAccuse,
+    finalizeDeal,
+    playerTotalScore,
+    aiTotalScore,
+    tableCards,
+    playerCaptured,
+    aiCaptured,
+    playerScope,
+    aiScope,
+    playerAccusePts,
+    aiAccusePts,
+  ]);
 
   const executeAITurn = useCallback(() => {
-    if (aiHand.length === 0) return;
+    if (aiHand.length === 0 || isAiExecutingRef.current) return;
+    isAiExecutingRef.current = true;
+    setIsAiTurnInProgress(true);
 
     const isLastPlay =
       deck.length === 0 &&
@@ -407,12 +432,10 @@ export function useCirullaGame() {
       if (move.isAceSweep) desc = `L'avversario gioca l'Asso! Prende tutte le carte...`;
       setLastActionMessage(desc);
 
-      // STEP 2: Give the human player 1.4s to clearly SEE the card and the capture targets
+      // STEP 2: Give the human player 1.2s to clearly SEE the card and the capture targets
       setTimeout(() => {
         const capturedIdsSet = new Set(targetIds);
-        const newTable = tableCards.filter((c) => !capturedIdsSet.has(c.id));
-
-        setTableCards(newTable);
+        setTableCards((prevTable) => prevTable.filter((c) => !capturedIdsSet.has(c.id)));
         setAiCaptured((prev) => [...prev, cardPlayed, ...move.capturedCards]);
         setLastCapturingPlayer('ai');
         setAiTargetCardIds([]);
@@ -430,9 +453,17 @@ export function useCirullaGame() {
 
         setTimeout(() => {
           setLastPlayedCardByAI(null);
-          checkHandEnd(playerHand, remainingAIHand);
-        }, 700);
-      }, 1400);
+          const currentPHand = playerHandRef.current;
+          if (currentPHand.length === 0 && remainingAIHand.length === 0) {
+            checkHandEnd(currentPHand, remainingAIHand);
+          } else {
+            setIsPlayerTurn(true);
+            setLastActionMessage('Tocca a te');
+          }
+          setIsAiTurnInProgress(false);
+          isAiExecutingRef.current = false;
+        }, 600);
+      }, 1200);
     } else {
       // Discard onto the table
       setLastActionMessage(`L'avversario cala ${cardPlayed.name} a terra.`);
@@ -440,9 +471,17 @@ export function useCirullaGame() {
         setTableCards((prev) => [...prev, cardPlayed]);
         setTimeout(() => {
           setLastPlayedCardByAI(null);
-          checkHandEnd(playerHand, remainingAIHand);
-        }, 500);
-      }, 1000);
+          const currentPHand = playerHandRef.current;
+          if (currentPHand.length === 0 && remainingAIHand.length === 0) {
+            checkHandEnd(currentPHand, remainingAIHand);
+          } else {
+            setIsPlayerTurn(true);
+            setLastActionMessage('Tocca a te');
+          }
+          setIsAiTurnInProgress(false);
+          isAiExecutingRef.current = false;
+        }, 400);
+      }, 800);
     }
   }, [
     deck.length,
@@ -458,15 +497,33 @@ export function useCirullaGame() {
   ]);
 
   useEffect(() => {
-    if (!isPlayerTurn && aiHand.length > 0) {
+    if (
+      !isPlayerTurn &&
+      !isAiTurnInProgress &&
+      !isAiExecutingRef.current &&
+      !isShufflingOrDealing &&
+      !accusaBanner.visible &&
+      !monteBanner.visible &&
+      aiHand.length > 0
+    ) {
       const timer = setTimeout(() => {
         executeAITurn();
       }, GAME_CONFIG.TIMINGS.AI_TURN_DELAY_MS);
       return () => clearTimeout(timer);
     }
-  }, [isPlayerTurn, aiHand.length, executeAITurn]);
+  }, [
+    isPlayerTurn,
+    isAiTurnInProgress,
+    isShufflingOrDealing,
+    accusaBanner.visible,
+    monteBanner.visible,
+    aiHand.length,
+    executeAITurn,
+  ]);
 
   const executePlayerMove = useCallback((card: Card, move?: CaptureMove) => {
+    if (!isPlayerTurn || isAiTurnInProgress || isAiExecutingRef.current) return;
+
     const remainingHand = playerHand.filter((c) => c.id !== card.id);
     setPlayerHand(remainingHand);
     setSelectedCard(null);
@@ -504,8 +561,14 @@ export function useCirullaGame() {
       setLastActionMessage(`Hai calato ${card.name} a terra.`);
     }
 
-    checkHandEnd(remainingHand, aiHand);
+    if (remainingHand.length === 0 && aiHand.length === 0) {
+      checkHandEnd(remainingHand, aiHand);
+    } else {
+      setIsPlayerTurn(false);
+    }
   }, [
+    isPlayerTurn,
+    isAiTurnInProgress,
     playerHand,
     aiHand,
     tableCards,
@@ -529,6 +592,7 @@ export function useCirullaGame() {
   }, [selectedCard, deck.length, handIndex, playerHand.length, aiHand.length, tableCards]);
 
   const selectPlayerCard = useCallback((card: Card) => {
+    if (!isPlayerTurn || isAiTurnInProgress || isAiExecutingRef.current) return;
     if (selectedCard?.id === card.id) {
       // Deselect card
       setSelectedCard(null);
@@ -540,10 +604,10 @@ export function useCirullaGame() {
       playSound('card', settings.soundEnabled, settings.hapticsEnabled);
       setLastActionMessage(`Hai selezionato ${card.name}. Clicca sulle carte a terra per prenderle o cala sul tavolo.`);
     }
-  }, [selectedCard, settings.soundEnabled, settings.hapticsEnabled]);
+  }, [selectedCard, isPlayerTurn, isAiTurnInProgress, settings.soundEnabled, settings.hapticsEnabled]);
 
   const toggleTableCard = useCallback((tableCard: Card) => {
-    if (!selectedCard || !isPlayerTurn) {
+    if (!selectedCard || !isPlayerTurn || isAiTurnInProgress || isAiExecutingRef.current) {
       setLastActionMessage('Seleziona prima una carta dalla tua mano in basso!');
       return;
     }
@@ -560,7 +624,7 @@ export function useCirullaGame() {
       }
       return next;
     });
-  }, [selectedCard, isPlayerTurn, settings.soundEnabled, settings.hapticsEnabled]);
+  }, [selectedCard, isPlayerTurn, isAiTurnInProgress, settings.soundEnabled, settings.hapticsEnabled]);
 
   const clearTableSelection = useCallback(() => {
     setSelectedTableCardIds([]);
@@ -568,7 +632,7 @@ export function useCirullaGame() {
   }, [settings.soundEnabled, settings.hapticsEnabled]);
 
   const confirmPlayCard = useCallback(() => {
-    if (!selectedCard || !isPlayerTurn) return;
+    if (!selectedCard || !isPlayerTurn || isAiTurnInProgress || isAiExecutingRef.current) return;
 
     const isLastPlay =
       deck.length === 0 &&
@@ -616,6 +680,7 @@ export function useCirullaGame() {
   }, [
     selectedCard,
     isPlayerTurn,
+    isAiTurnInProgress,
     selectedTableCardIds,
     deck.length,
     handIndex,
@@ -698,6 +763,7 @@ export function useCirullaGame() {
     playerScope,
     aiScope,
     isPlayerTurn,
+    isAiTurnInProgress,
     selectedCard,
     selectedMove,
     availableMovesForSelected,

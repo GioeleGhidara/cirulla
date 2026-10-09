@@ -96,7 +96,7 @@ export const MatchSetupModal: React.FC<MatchSetupModalProps> = ({
                     targetScore === 51 && styles.optionTitleSelected,
                   ]}
                 >
-                  Classica Ligure
+                  Classica
                 </Text>
                 <AppBadge label="51 PT" variant={targetScore === 51 ? 'gold' : 'default'} size="sm" />
               </View>

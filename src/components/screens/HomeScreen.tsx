@@ -138,14 +138,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       >
         {/* Brand Banner */}
         <View style={styles.brandHero}>
-          <View style={styles.brandTagline}>
-            <Ionicons name="heart" size={13} color="#ef4444" />
-            <Text style={styles.taglineText}>CIRULLA DELLA TRADIZIONE LIGURE</Text>
-          </View>
           <Text style={styles.heroTitle}>CIRULLA</Text>
-          <Text style={styles.heroSubtitle}>
-            Il gioco di carte più amato della Riviera e dei Caruggi di Genova
-          </Text>
         </View>
 
         {/* Active Match or Quick Play Card */}
